@@ -63,10 +63,16 @@ print_output()
 {
 	local width=$1
 	shift
+	local status=$1
+	shift
 	local output="$@"
 	local msg=`cat "$output" | tr '\n' ' '`
 
-	printf "%-*s" $width "$msg"
+	if [ $status -eq 139 ]; then
+		printf "${RED}%-70s${NC}" "segfault"
+	else
+		printf "%-*s" $width "$msg"
+	fi
 }
 
 run_checks()
@@ -89,17 +95,17 @@ run_checks()
 		./$ASM_42 $champ > $output_42 2>&1
 		status_42=$?
 		print_status_asm $status_42
-		[ -f $cor_file ] && mv $cor_file $bytecode_42	
+		[ -f $cor_file ] && mv $cor_file $bytecode_42
 
-		[ $status_usr -ne 0 ] && print_output 70 $output_usr
-		[ $status_42 -ne 0 ] && print_output 110 $output_42
+		[ $status_usr -ne 0 ] && print_output 70 $status_usr $output_usr
+		[ $status_42 -ne 0 ] && print_output 110 $status_42 $output_42
 		if [ $status_42 -eq 0 ]; then
 			if [ $status_42 -eq $status_usr ]; then
 			   local diff=`diff $bytecode_42 $bytecode_usr 2>&1`
 			   if [ "$diff" ];then
-				   printf " ${RED}%s${NC}" "bytecode files differ"
+				   printf "${RED}%s${NC}" "bytecode files differ"
 			   else
-				   printf " ${GREEN}%s${NC}" "success"
+				   printf "${GREEN}%s${NC}" "success"
 			   fi
 		   fi
 		fi
@@ -114,4 +120,4 @@ run_checks()
 ASM_USR="$1"
 shift
 [ $# -gt 0 ] && CHAMPIONS="$@"
-run_checks
+run_checks 2> /dev/null
