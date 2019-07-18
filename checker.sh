@@ -97,18 +97,21 @@ run_checks()
 		print_status_asm $status_42
 		[ -f $cor_file ] && mv $cor_file $bytecode_42
 
+
+		if [ $status_usr -ne 0 -a $status_42 -ne 0 ]; then
+			printf "${GREEN}%-8s${NC}" "good"
+		elif [ $status_usr -eq 0 -a $status_42 -eq 0 ]; then
+			local diff=`diff $bytecode_42 $bytecode_usr 2>&1`
+			if [ "$diff" ];then
+				printf "${RED}%-8s${NC} %s" "error" "bytecode files differ"
+			else
+				printf "${GREEN}%-8s${NC}" "success"
+			fi
+		else
+			printf "${RED}%-8s${NC}" "error"
+		fi
 		[ $status_usr -ne 0 ] && print_output 70 $status_usr $output_usr
 		[ $status_42 -ne 0 ] && print_output 110 $status_42 $output_42
-		if [ $status_42 -eq 0 ]; then
-			if [ $status_42 -eq $status_usr ]; then
-			   local diff=`diff $bytecode_42 $bytecode_usr 2>&1`
-			   if [ "$diff" ];then
-				   printf "${RED}%s${NC}" "bytecode files differ"
-			   else
-				   printf "${GREEN}%s${NC}" "success"
-			   fi
-		   fi
-		fi
 		printf "\n"
 	done
 	rm $output_42 $output_usr $bytecode_42 $bytecode_usr
