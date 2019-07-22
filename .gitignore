@@ -1,0 +1,16 @@
+# swap files
+*.sw*
+*.tmp
+
+# bin
+*.out
+*.bin
+
+# libs
+*.a
+
+# .obj dirs
+.obj/
+
+# tag files
+tags
