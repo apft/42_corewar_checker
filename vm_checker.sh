@@ -51,17 +51,6 @@ check_args()
 	check_executable $2
 }
 
-print_header()
-{
-	local width=35
-
-	printf "%*s" 5 ""
-	printf "$UNDERLINE"
-	printf "%*s  %*s" $width $1 $width $1
-	printf "$RESET"
-	printf "\n"
-}
-
 timeout_fct()
 {
 	local bin=$1
@@ -117,10 +106,11 @@ run_test()
 	shift
 	shift
 	local players=$@
-	local vm1_status vm2_status diff_file
+	local vm1_status vm2_status
+	local diff_tmp="diff_output.tmp"
+	local diff_file
 	
 	initialize_directory
-	print_header $vm1_exec $vm2_exec
 	for player in $players
 	do
 		if [ ! -f $player ]; then
@@ -132,6 +122,7 @@ run_test()
 				player=`echo $player | rev | cut -d '.' -f 2 | rev`
 				player+=".cor"
 			fi
+			printf "%-*s  " 60 $player
 			timeout_fct $vm1_exec vm1_output.tmp -v 31 $player 2> /dev/null
 			vm1_status=$?
 			print_status_program $vm1_status
@@ -139,15 +130,14 @@ run_test()
 			vm2_status=$?
 			print_status_program $vm2_status
 			#$vm2_exec -v 31 $player > vm2_output.tmp 2>&1
-			printf " "
 			if [ $vm1_status -ne 0 -o $vm2_status -ne 0 ]; then
-				[ $vm1_status -eq $TIMEOUT_STATUS ] && print_timeout $vm1_exec
-				[ $vm2_status -eq $TIMEOUT_STATUS ] && print_timeout $vm2_exec
+				print_error "timeout"
 				printf "\n"
 			else
-				diff_file=$DIFF_DIR/`basename $player.diff.$(date "+%Y%M%d%H%M")`
-				diff -y vm1_output.tmp vm2_output.tmp > $diff_file
-				if [ -s diff_output.tmp ]; then
+				diff vm1_output.tmp vm2_output.tmp > $diff_tmp
+				if [ -s $diff_tmp ]; then
+					diff_file=$DIFF_DIR/`basename $player.diff.$(date "+%Y%M%d%H%M")`
+					diff -y vm1_output.tmp vm2_output.tmp > $diff_file
 					print_error "Booo!"
 					printf " see $diff_file"
 					printf "\n"
@@ -159,6 +149,7 @@ run_test()
 			[ $RUN_ASM -eq 1 ] && rm $player
 		fi
 	done
+	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
 DIFF_DIR=".diff"
