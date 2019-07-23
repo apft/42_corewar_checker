@@ -1,33 +1,34 @@
 #!/bin/bash
 
+# 1: exec 1
+# 2: exec 2
+# 3: player
+# 4: cycle
+# 5: verbose level
 run_test(){
-	$1 -d $4 $3 > vm1_output.tmp 2>&1
-	$2 -d $4 $3 > vm2_output.tmp 2>&1
+	$1 -v $5 -d $4 $3 > vm1_output.tmp 2>&1
+	$2 -v $5 -d $4 $3 > vm2_output.tmp 2>&1
 	diff vm1_output.tmp vm2_output.tmp > diff_output.tmp
 }
 
 run_tests(){
-	local nb_of_cycles=`$VM1_EXEC -v 2 $PLAYER | tail -n 2 | head -n 1 | cut -d ' ' -f 5 | bc`
+	local nb_of_cycles=`$VM1_EXEC -v 2 $PLAYER | grep "It is now cycle" | tail -n 1 | cut -d ' ' -f 5 | bc`
 	local min=1
 	local max=$nb_of_cycles
 	
 	printf "Number of cycles: %d\n" $nb_of_cycles
 	while [ $min -lt `echo "$max - 1" | bc` ];
 	do
-#		printf "min: %d | max: %d\n" $min $max
 		cycle=`echo "($min + $max) / 2" | bc`
-#		printf "Cycle: %d\n" $cycle
-		run_test $VM1_EXEC $VM2_EXEC $PLAYER $cycle
+		run_test $VM1_EXEC $VM2_EXEC $PLAYER $cycle 0
 		if [ -s diff_output.tmp ];then
-#			printf "Cycle %d: %s\n" $cycle "output differ"
 			max=$cycle
 		else
-#			printf "Cycle %d: %s\n" $cycle "output is same"
 			min=$cycle
 		fi
 	done
 	printf "Dump differs at cycle %d\n" $max
-	run_test $VM1_EXEC $VM2_EXEC $PLAYER $max
+	run_test $VM1_EXEC $VM2_EXEC $PLAYER $max 31
 }
 
 VM1_EXEC=$1
