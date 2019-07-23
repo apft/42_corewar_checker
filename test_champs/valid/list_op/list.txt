@@ -203,9 +203,3 @@
 16;aff;reg is valid;r1
 16;aff;reg is valid and null;r2
 16;aff;reg is invalid;r32
-
-
-49859842
--49859842
-94837589436749859842
--94837589436749859842
