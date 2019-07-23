@@ -48,6 +48,27 @@ check_args()
 	check_executable $2
 }
 
+initialize_directory()
+{
+	[ ! -d $DIFF_DIR ] && mkdir $DIFF_DIR
+}
+
+compute_first_column_width()
+{
+	local players=$@
+	local width=0
+	local length
+
+	for player in $players
+	do
+		length=${#player}
+		if [ $width -lt $length ]; then
+			width=$length
+		fi
+	done
+	echo $((width + 5))
+}
+
 timeout_fct()
 {
 	local bin=$1
@@ -90,11 +111,6 @@ print_timeout()
 	printf "$RED%*s  $RESET" $width "timeout"
 }
 
-initialize_directory()
-{
-	[ ! -d $DIFF_DIR ] && mkdir $DIFF_DIR
-}
-
 run_test()
 {
 	local vm1_exec=$1
@@ -104,20 +120,26 @@ run_test()
 	local vm1_status vm2_status
 	local diff_tmp="diff_output.tmp"
 	local diff_file
+	local first_column_width=`compute_first_column_width $players`
 	
 	initialize_directory
 	for player in $players
 	do
+		printf "%-*s  " $first_column_width $player
 		if [ ! -f $player ]; then
 			printf "${YELLOW}%s${RESET}\n" "Player ($player) not found\n"
 		else
 			if [ $RUN_ASM -eq 1 ]; then
 				$ASM $player > /dev/null 2>&1
-				[ $? -ne 0 ] && printf "Could not convert to ASM" && exit
+				if [ $? -ne 0 ]; then
+					print_status_program 1
+					print_status_program 1
+					printf "Could not convert to ASM\n"
+					continue
+				fi
 				player=`echo $player | rev | cut -d '.' -f 2 | rev`
 				player+=".cor"
 			fi
-			printf "%-*s  " 60 $player
 			timeout_fct $vm1_exec vm1_output.tmp -v 31 $player 2> /dev/null
 			vm1_status=$?
 			print_status_program $vm1_status
