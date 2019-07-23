@@ -55,19 +55,154 @@
 06;and;ind value is small and two valid registers;-49859842,r1,r2
 06;and;ind value is too big and two valid registers;94837589436749859842,r1,r2
 06;and;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+06;and;dir value is null and two valid registers;%0,r1,r2
+06;and;dir value is pos and two valid registers;%42,r1,r2
+06;and;dir value is neg and two valid registers;%-42,r1,r2
+06;and;dir value is big and two valid registers;%49859842,r1,r2
+06;and;dir value is small and two valid registers;%-49859842,r1,r2
+06;and;dir value is too big and two valid registers;%94837589436749859842,r1,r2
+06;and;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
-07;or;
-08;xor;
+07;or;three valid registers;r1,r1,r2
+07;or;three registers first is invalid;r32,r1,r2
+07;or;three registers second is invalid;r1,r32,r2
+07;or;three registers third is invalid;r1,r1,r32
+07;or;ind value is null and two valid registers;0,r1,r2
+07;or;ind value is pos and two valid registers;42,r1,r2
+07;or;ind value is neg and two valid registers;-42,r1,r2
+07;or;ind value is big and two valid registers;49859842,r1,r2
+07;or;ind value is small and two valid registers;-49859842,r1,r2
+07;or;ind value is too big and two valid registers;94837589436749859842,r1,r2
+07;or;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+07;or;dir value is null and two valid registers;%0,r1,r2
+07;or;dir value is pos and two valid registers;%42,r1,r2
+07;or;dir value is neg and two valid registers;%-42,r1,r2
+07;or;dir value is big and two valid registers;%49859842,r1,r2
+07;or;dir value is small and two valid registers;%-49859842,r1,r2
+07;or;dir value is too big and two valid registers;%94837589436749859842,r1,r2
+07;or;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+
+08;xor;three valid registers;r1,r1,r2
+08;xor;three registers first is invalid;r32,r1,r2
+08;xor;three registers second is invalid;r1,r32,r2
+08;xor;three registers third is invalid;r1,r1,r32
+08;xor;ind value is null and two valid registers;0,r1,r2
+08;xor;ind value is pos and two valid registers;42,r1,r2
+08;xor;ind value is neg and two valid registers;-42,r1,r2
+08;xor;ind value is big and two valid registers;49859842,r1,r2
+08;xor;ind value is small and two valid registers;-49859842,r1,r2
+08;xor;ind value is too big and two valid registers;94837589436749859842,r1,r2
+08;xor;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+08;xor;dir value is null and two valid registers;%0,r1,r2
+08;xor;dir value is pos and two valid registers;%42,r1,r2
+08;xor;dir value is neg and two valid registers;%-42,r1,r2
+08;xor;dir value is big and two valid registers;%49859842,r1,r2
+08;xor;dir value is small and two valid registers;%-49859842,r1,r2
+08;xor;dir value is too big and two valid registers;%94837589436749859842,r1,r2
+08;xor;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+
 09;zjmp;
-10;ldi;
-11;sti;
-12;fork;
-13;lld;
-14;lldi;
-15;lfork;
-16;aff;
 
+10;ldi;three valid registers;r1,r1,r2
+10;ldi;three registers first is invalid;r32,r1,r2
+10;ldi;three registers second is invalid;r1,r32,r2
+10;ldi;three registers third is invalid;r1,r1,r32
+10;ldi;ind value is null and two valid registers;0,r1,r2
+10;ldi;ind value is pos and two valid registers;42,r1,r2
+10;ldi;ind value is neg and two valid registers;-42,r1,r2
+10;ldi;ind value is big and two valid registers;49859842,r1,r2
+10;ldi;ind value is small and two valid registers;-49859842,r1,r2
+10;ldi;ind value is too big and two valid registers;94837589436749859842,r1,r2
+10;ldi;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+10;ldi;dir value is null and two valid registers;%0,r1,r2
+10;ldi;dir value is pos and two valid registers;%42,r1,r2
+10;ldi;dir value is neg and two valid registers;%-42,r1,r2
+10;ldi;dir value is big and two valid registers;%49859842,r1,r2
+10;ldi;dir value is small and two valid registers;%-49859842,r1,r2
+10;ldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
+10;ldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
+11;sti;three valid registers;r1,r1,r2
+11;sti;three registers first is invalid;r32,r1,r2
+11;sti;three registers second is invalid;r1,r32,r2
+11;sti;three registers third is invalid;r1,r1,r32
+11;sti;ind value is null and two valid registers;r1,0,r2
+11;sti;ind value is pos and two valid registers;r1,42,r2
+11;sti;ind value is neg and two valid registers;r1,-42,r2
+11;sti;ind value is big and two valid registers;r1,49859842,r2
+11;sti;ind value is small and two valid registers;r1,-49859842,r2
+11;sti;ind value is too big and two valid registers;r1,94837589436749859842,r2
+11;sti;ind value is too small and two valid registers;r1,-94837589436749859842,r2
+11;sti;dir value is null and two valid registers;r1,%0,r2
+11;sti;dir value is pos and two valid registers;r1,%42,r2
+11;sti;dir value is neg and two valid registers;r1,%-42,r2
+11;sti;dir value is big and two valid registers;r1,%49859842,r2
+11;sti;dir value is small and two valid registers;r1,%-49859842,r2
+11;sti;dir value is too big and two valid registers;r1,%94837589436749859842,r2
+11;sti;dir value is too small and two valid registers;r1,%-94837589436749859842,r2
+11;sti;two valid registers and dir value is null;r1,r2,%0
+11;sti;two valid registers and dir value is pos;r1,r2,%42
+11;sti;two valid registers and dir value is neg;r1,r2,%-42
+11;sti;two valid registers and dir value is big;r1,r2,%49859842
+11;sti;two valid registers and dir value is small;r1,r2,%-49859842
+11;sti;two valid registers and dir value is too big;r1,r2,%94837589436749859842
+11;sti;two valid registers and dir value is too small;r1,r2,%-94837589436749859842
+
+12;fork;dir value is null;%0
+12;fork;dir value is pos;%42
+12;fork;dir value is neg;%-42
+12;fork;dir value is big;%49859842
+12;fork;dir value is small;%-49859842
+12;fork;dir value is too big;%94837589436749859842
+12;fork;dir value is too small;%-94837589436749859842
+
+13;lld;ind value is null reg is valid;0,r2
+13;lld;ind value is null reg is invalid;0,r32
+13;lld;ind value is pos reg is valid;42,r2
+13;lld;ind value is neg reg is valid;-42,r2
+13;lld;ind value is big reg is valid;49859842,r2
+13;lld;ind value is small reg is valid;-49859842,r2
+13;lld;ind value is too big reg is valid;94837589436749859842,r2
+13;lld;ind value is too small reg is valid;-94837589436749859842,r2
+13;lld;dir value is null reg is valid;%0,r2
+13;lld;dir value is null reg is invalid;%0,r32
+13;lld;dir value is pos reg is valid;%42,r2
+13;lld;dir value is neg reg is valid;%-42,r2
+13;lld;dir value is big reg is valid;%49859842,r2
+13;lld;dir value is small reg is valid;%-49859842,r2
+13;lld;dir value is too big reg is valid;%94837589436749859842,r2
+13;lld;dir value is too small reg is valid;%-94837589436749859842,r2
+
+14;lldi;three valid registers;r1,r1,r2
+14;lldi;three registers first is invalid;r32,r1,r2
+14;lldi;three registers second is invalid;r1,r32,r2
+14;lldi;three registers third is invalid;r1,r1,r32
+14;lldi;ind value is null and two valid registers;0,r1,r2
+14;lldi;ind value is pos and two valid registers;42,r1,r2
+14;lldi;ind value is neg and two valid registers;-42,r1,r2
+14;lldi;ind value is big and two valid registers;49859842,r1,r2
+14;lldi;ind value is small and two valid registers;-49859842,r1,r2
+14;lldi;ind value is too big and two valid registers;94837589436749859842,r1,r2
+14;lldi;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+14;lldi;dir value is null and two valid registers;%0,r1,r2
+14;lldi;dir value is pos and two valid registers;%42,r1,r2
+14;lldi;dir value is neg and two valid registers;%-42,r1,r2
+14;lldi;dir value is big and two valid registers;%49859842,r1,r2
+14;lldi;dir value is small and two valid registers;%-49859842,r1,r2
+14;lldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
+14;lldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+
+15;lfork;dir value is null;%0
+15;lfork;dir value is pos;%42
+15;lfork;dir value is neg;%-42
+15;lfork;dir value is big;%49859842
+15;lfork;dir value is small;%-49859842
+15;lfork;dir value is too big;%94837589436749859842
+15;lfork;dir value is too small;%-94837589436749859842
+
+16;aff;reg is valid;r1
+16;aff;reg is valid and null;r2
+16;aff;reg is invalid;r32
 
 
 49859842
