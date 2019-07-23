@@ -1,10 +1,10 @@
-01;live;param is null;%0
-01;live;param is pos;%42
-01;live;param is neg;%-42
-01;live;param is big;%49859842
-01;live;param is small;%-49859842
-01;live;param is too big;%94837589436749859842
-01;live;param is too small;%-94837589436749859842
+01;live;dir value is null;%0
+01;live;dir value is pos;%42
+01;live;dir value is neg;%-42
+01;live;dir value is big;%49859842
+01;live;dir value is small;%-49859842
+01;live;dir value is too big;%94837589436749859842
+01;live;dir value is too small;%-94837589436749859842
 
 02;ld;ind value is null reg is valid;0,r2
 02;ld;ind value is null reg is invalid;0,r32
