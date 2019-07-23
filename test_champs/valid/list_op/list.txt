@@ -1,0 +1,76 @@
+01;live;param is null;%0
+01;live;param is pos;%42
+01;live;param is neg;%-42
+01;live;param is big;%49859842
+01;live;param is small;%-49859842
+01;live;param is too big;%94837589436749859842
+01;live;param is too small;%-94837589436749859842
+
+02;ld;ind value is null reg is valid;0,r2
+02;ld;ind value is null reg is invalid;0,r32
+02;ld;ind value is pos reg is valid;42,r2
+02;ld;ind value is neg reg is valid;-42,r2
+02;ld;ind value is big reg is valid;49859842,r2
+02;ld;ind value is small reg is valid;-49859842,r2
+02;ld;ind value is too big reg is valid;94837589436749859842,r2
+02;ld;ind value is too small reg is valid;-94837589436749859842,r2
+02;ld;dir value is null reg is valid;%0,r2
+02;ld;dir value is null reg is invalid;%0,r32
+02;ld;dir value is pos reg is valid;%42,r2
+02;ld;dir value is neg reg is valid;%-42,r2
+02;ld;dir value is big reg is valid;%49859842,r2
+02;ld;dir value is small reg is valid;%-49859842,r2
+02;ld;dir value is too big reg is valid;%94837589436749859842,r2
+02;ld;dir value is too small reg is valid;%-94837589436749859842,r2
+
+03;st;reg is valid ind value is null;r1,0
+03;st;reg is valid ind value is pos;r1,42 
+03;st;reg is valid ind value is neg;r1,-42 
+03;st;reg is valid ind value is big;r1,49859842
+03;st;reg is valid ind value is small;r1,-49859842
+03;st;reg is valid ind value is too big;r1,94837589436749859842
+03;st;reg is valid ind value is too small;r1,-94837589436749859842 
+03;st;reg is invalid ind value is pos;r32,42 
+03;st;reg is valid reg is valid;r1,r2 
+03;st;reg is invalid reg is valid;r32,r2 
+
+04;add;all registers are valid;r1,r1,r2
+04;add;first register is invalid;r32,r1,r2
+04;add;second register is invalid;r1,r32,r2
+04;add;third register is invalid;r1,r2,r32
+
+05;sub;all registers are valid;r1,r1,r2
+05;sub;first register is invalid;r32,r1,r2
+05;sub;second register is invalid;r1,r32,r2
+05;sub;third register is invalid;r1,r2,r32
+
+06;and;three valid registers;r1,r1,r2
+06;and;three registers first is invalid;r32,r1,r2
+06;and;three registers second is invalid;r1,r32,r2
+06;and;three registers third is invalid;r1,r1,r32
+06;and;ind value is null and two valid registers;0,r1,r2
+06;and;ind value is pos and two valid registers;42,r1,r2
+06;and;ind value is neg and two valid registers;-42,r1,r2
+06;and;ind value is big and two valid registers;49859842,r1,r2
+06;and;ind value is small and two valid registers;-49859842,r1,r2
+06;and;ind value is too big and two valid registers;94837589436749859842,r1,r2
+06;and;ind value is too small and two valid registers;-94837589436749859842,r1,r2
+
+07;or;
+08;xor;
+09;zjmp;
+10;ldi;
+11;sti;
+12;fork;
+13;lld;
+14;lldi;
+15;lfork;
+16;aff;
+
+
+
+
+49859842
+-49859842
+94837589436749859842
+-94837589436749859842
