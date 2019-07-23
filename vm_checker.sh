@@ -127,7 +127,7 @@ run_test()
 			printf "${YELLOW}%s${RESET}\n" "Player ($player) not found\n"
 		else
 			if [ $RUN_ASM -eq 1 ]; then
-				$ASM $player
+				$ASM $player > /dev/null 2>&1
 				[ $? -ne 0 ] && printf "Could not convert to ASM" && exit
 				player=`echo $player | rev | cut -d '.' -f 2 | rev`
 				player+=".cor"
