@@ -216,3 +216,4 @@
 16;aff;reg is valid;r1
 16;aff;reg is valid and null;r2
 16;aff;reg is invalid;r32
+16;aff;reg is valid print a;r2;ld %97,r2
