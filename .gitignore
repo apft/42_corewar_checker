@@ -17,3 +17,7 @@ tags
 # script output
 *.tmp
 .diff/
+.leaks/
+
+# debug
+*.dSYM
