@@ -99,8 +99,7 @@ get_status()
 
 	if [ $CHECK_LEAKS -ne 0 ]; then
 		check_leaks $leak_file
-		status_leaks=$?
-		[ $status_leaks -eq $STATUS_LEAKS ] && return $status_leaks
+		[ $? -eq $STATUS_LEAKS ] && return $STATUS_LEAKS
 	fi
 	[ $status -ne 0 ] && return $status
 	return 0
@@ -192,7 +191,6 @@ do
 			clean_dir
 			;;
 		l)
-			echo "check"
 			CHECK_LEAKS=1
 			;;
 		*)
