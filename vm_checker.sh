@@ -54,6 +54,15 @@ check_args()
 initialize_directory()
 {
 	[ ! -d $DIFF_DIR ] && mkdir $DIFF_DIR
+	[ ! -d $LEAKS_DIR ] && mkdir $LEAKS_DIR
+}
+
+clean_dir()
+{
+	if [ $CLEAN_FIRST -eq 1 ]; then
+		[ -d $DIFF_DIR ] && rm -r $DIFF_DIR
+		[ -d $LEAKS_DIR ] && rm -r $LEAKS_DIR
+	fi
 }
 
 compute_first_column_width()
@@ -182,14 +191,8 @@ run_test()
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
-clean_dir()
-{
-	if [ $CLEAN_FIRST -eq 1 ]; then
-		[ -d $DIFF_DIR ] && rm -r $DIFF_DIR
-	fi
-}
-
 DIFF_DIR=".diff"
+LEAKS_DIR=".leaks"
 ASM="../corewar/corewar_resources/asm"
 RUN_ASM=0
 CLEAN_FIRST=0
