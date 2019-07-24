@@ -117,10 +117,14 @@ run_test()
 	local vm2_exec=$2
 	shift 2
 	local players=$@
+	local nbr_of_players=${#}
 	local vm1_status vm2_status
 	local diff_tmp="diff_output.tmp"
 	local diff_file
 	local first_column_width=`compute_first_column_width $players`
+	local count_success=0
+	local count_failure=0
+	local count_timeout=0
 	
 	initialize_directory
 	for player in $players
@@ -147,17 +151,20 @@ run_test()
 			vm2_status=$?
 			print_status_program $vm2_status
 			if [ $vm1_status -ne 0 -o $vm2_status -ne 0 ]; then
+				((count_timeout++))
 				print_error "timeout"
 				printf "\n"
 			else
 				diff vm1_output.tmp vm2_output.tmp > $diff_tmp
 				if [ -s $diff_tmp ]; then
+					((count_failure++))
 					diff_file=$DIFF_DIR/`basename $player.diff.$(date "+%Y%M%d%H%M")`
 					diff -y vm1_output.tmp vm2_output.tmp > $diff_file
 					print_error "Booo!"
 					printf " see $diff_file"
 					printf "\n"
 				else
+					((count_success++))
 					print_ok "Good!"
 					printf "\n"
 				fi
@@ -165,6 +172,10 @@ run_test()
 			[ $RUN_ASM -eq 1 ] && rm $player
 		fi
 	done
+	printf "\n"
+	printf "Success: ${GREEN}%4d/%d${RESET}\n" $count_success $nbr_of_players
+	printf "Failure: ${RED}%4d/%d${RESET}\n" $count_failure $nbr_of_players
+	printf "Timeout: ${YELLOW}%4d/%d${RESET}\n" $count_timeout $nbr_of_players
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
@@ -179,8 +190,8 @@ DIFF_DIR=".diff"
 ASM="../corewar/corewar_resources/asm"
 RUN_ASM=0
 CLEAN_FIRST=0
-TIMEOUT=5 #second
-TIMEOUT_STATUS=2 #second
+TIMEOUT=20 #second
+TIMEOUT_STATUS=2
 
 while getopts "bch" o
 do
@@ -196,11 +207,11 @@ do
 			;;
 	esac
 done
+shift $((OPTIND - 1))
 if [ $# -lt 3 ];then
 	print_usage_and_exit
 	exit
 fi
-shift $((OPTIND - 1))
 clean_dir
 check_args $@
 run_test $@
