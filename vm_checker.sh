@@ -21,14 +21,15 @@ print_warning()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v mode] exec1 exec2 player"
-	printf "%s\n" "  - [-b]          convert player to bytecode first"
-	printf "%s\n" "  - [-c]          clean directory at first"
-	printf "%s\n" "  - [-a]          enable aff operator"
-	printf "%s\n" "  - [-v mode]     verbose mode (mode should be between 0 and 31)"
-	printf "%s\n" "  - [-h]          print this message and exit"
-	printf "%s\n" "  - exec          path to executable"
-	printf "%s\n" "  - player        player (.cor file)"
+	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v N] [-t N] exec1 exec2 player"
+	printf "%s\n" "  - [-b]       convert player to bytecode first"
+	printf "%s\n" "  - [-c]       clean directory at first"
+	printf "%s\n" "  - [-a]       enable aff operator"
+	printf "%s\n" "  - [-v N]     verbose mode (mode should be between 0 and 31)"
+	printf "%s\n" "  - [-t N]     timeout value in seconds (default 10 seconds)"
+	printf "%s\n" "  - [-h]       print this message and exit"
+	printf "%s\n" "  - exec       path to executable"
+	printf "%s\n" "  - player     player (.cor file)"
 	exit
 }
 
@@ -80,7 +81,7 @@ timeout_fct()
 
 	{ time $bin $args; } > $tmp_out 2>&1 &
 	local pid=$!
-	sleep $TIMEOUT &
+	sleep $TIMEOUT_VALUE &
 	local pid_sleep=$!
 	while ps -p $pid_sleep > /dev/null
 	do
@@ -192,14 +193,15 @@ DIFF_DIR=".diff"
 ASM="../corewar/corewar_resources/asm"
 RUN_ASM=0
 CLEAN_FIRST=0
-TIMEOUT=20 #second
+CHECK_LEAKS=0
+TIMEOUT_VALUE=10 #second
 TIMEOUT_STATUS=2
 OPT_A=""
 OPT_V=""
 OPT_V_LIMIT_MIN=0
 OPT_V_LIMIT_MAX=31
 
-while getopts "bchav:" opt
+while getopts "bchav:t:" opt
 do
 	case "$opt" in
 		b)
@@ -210,6 +212,12 @@ do
 			;;
 		a)
 			OPT_A="-a"
+			;;
+		t)
+			echo $OPTARG
+			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
+				TIMEOUT_VALUE=$OPTARG
+			fi
 			;;
 		v)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
