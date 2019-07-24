@@ -101,7 +101,20 @@
 08;xor;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 08;xor;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
-09;zjmp;
+09;zjmp;dir value is null carry is one;%0
+09;zjmp;dir value is pos carry is one;%42
+09;zjmp;dir value is neg carry is one;%-42
+09;zjmp;dir value is big carry is one;%49859842
+09;zjmp;dir value is small carry is one;%-49859842
+09;zjmp;dir value is too big carry is one;%94837589436749859842
+09;zjmp;dir value is too small carry is one;%-94837589436749859842
+09;zjmp;dir value is null carry is null;%0;ld %1,r4
+09;zjmp;dir value is pos carry is null;%42;ld %1,r4
+09;zjmp;dir value is neg carry is null;%-42;ld %1,r4
+09;zjmp;dir value is big carry is null;%49859842;ld %1,r4
+09;zjmp;dir value is small carry is null;%-49859842;ld %1,r4
+09;zjmp;dir value is too big carry is null;%94837589436749859842;ld %1,r4
+09;zjmp;dir value is too small carry is null;%-94837589436749859842;ld %1,r4
 
 10;ldi;three valid registers;r1,r1,r2
 10;ldi;three registers first is invalid;r32,r1,r2

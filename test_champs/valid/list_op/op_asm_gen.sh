@@ -15,6 +15,8 @@ extract_field()
 
 create_content()
 {
+	local count_sep=$1
+	shift
 	local line=$@
 
 	local op=`extract_field 2 $line`
@@ -24,6 +26,12 @@ create_content()
 	echo "$NAME \"$op\""
 	echo "$COMMENT \"$comment\""
 	echo
+	i=4
+	while [ $i -le $count_sep ]
+	do
+		echo `extract_field $((i + 1)) $line`
+		((i++))
+	done
 	echo $op $args
 }
 
@@ -40,8 +48,8 @@ create_filename()
 while read line
 do
 	count_sep="`echo $line | grep -o \"$SEPARATOR\" | wc -l | bc`"
-	if [ "$line" -a $count_sep -eq 3 ]; then
+	if [ "$line" -a $count_sep -ge 3 ]; then
 		filename=`create_filename $line`
-		create_content $line > $filename
+		create_content $count_sep $line > $filename
 	fi
 done < $DATA
