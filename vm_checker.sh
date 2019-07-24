@@ -21,12 +21,13 @@ print_warning()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v N] [-t N] exec player"
+	printf "%s\n" "Usage: ./vm_checker.sh [-bchl] [-v N] [-t N] exec player"
 	printf "%s\n" "  - [-b]       convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]       clean directory at first"
 	printf "%s\n" "  - [-a]       enable aff operator"
 	printf "%s\n" "  - [-v N]     verbose mode (mode should be between 0 and 31)"
 	printf "%s\n" "  - [-t N]     timeout value in seconds (default 10 seconds)"
+	printf "%s\n" "  - [-l]       check for leaks"
 	printf "%s\n" "  - [-h]       print this message and exit"
 	printf "%s\n" "  - exec       path to your executable"
 	printf "%s\n" "  - player     player (.cor file, or .s file with the -b option)"
@@ -117,7 +118,11 @@ timeout_fct()
 	shift 3
 	local args=$@
 
-	{ time `command_check_leaks $leak_file` $bin $args; } > $tmp_out 2>&1 &
+	if [ "$bin" != "$VM_42" ]; then
+		{ time `command_check_leaks $leak_file` $bin $args; } > $tmp_out 2>&1 &
+	else
+		{ time $bin $args; } > $tmp_out 2>&1 &
+	fi
 	local pid=$!
 	sleep $TIMEOUT_VALUE &
 	local pid_sleep=$!
@@ -142,8 +147,11 @@ get_status()
 	local leak_file=$2
 
 	[ $status -ne 0 ] && return $status
-	check_leaks $leak_file
-	return $?
+	if [ $CHECK_LEAKS -ne 0 ]; then
+		check_leaks $leak_file
+		return $?
+	fi
+	return 0
 }
 
 print_status_program()
@@ -169,6 +177,7 @@ run_test()
 	local count_success=0
 	local count_failure=0
 	local count_timeout=0
+	local count_leaks=0
 	
 	initialize_directory
 	for player in $players
@@ -177,6 +186,7 @@ run_test()
 		if [ ! -f $player ]; then
 			printf "${YELLOW}%s${RESET}\n" "Player ($player) not found\n"
 		else
+			leak_file=$LEAKS_DIR/`create_filename $player "leak"`
 			if [ $RUN_ASM -eq 1 ]; then
 				$ASM $player > /dev/null 2>&1
 				if [ $? -ne 0 ]; then
@@ -188,12 +198,9 @@ run_test()
 				player=`echo $player | rev | cut -d '.' -f 2 | rev`
 				player+=".cor"
 			fi
-			leak_file=$LEAKS_DIR/`create_filename $player "vm1.leak"`
 			timeout_fct $vm1_exec vm1_output.tmp $leak_file $OPT_A $OPT_V $player 2> /dev/null
-			get_status $? $leak_file
 			vm1_status=$?
 			print_status_program $vm1_status
-			leak_file=$LEAKS_DIR/`create_filename $player "vm2.leak"`
 			timeout_fct $vm2_exec vm2_output.tmp $leak_file $OPT_A $OPT_V $player 2> /dev/null
 			get_status $? $leak_file
 			vm2_status=$?
@@ -203,11 +210,12 @@ run_test()
 				local vm_leaks=0
 				for vm_status in $vm1_status $vm2_status
 				do
-					[ $vm_status -eq 0 ] && printf "ok        "
+					[ $vm_status -eq 0 ] && printf "ok      "
 					[ $vm_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
-					[ $vm_status -eq $STATUS_LEAKS ] && print_error "leaks    " && vm_leaks=1
+					[ $CHECK_LEAKS -ne 0 -a $vm_status -eq $STATUS_LEAKS ] && print_error "leaks    " && vm_leaks=1
 				done
 				[ $vm_timeout -eq 1 ] && ((count_timeout++))
+				[ $vm_leaks -eq 1 ] && ((count_leaks++))
 			else
 				diff vm1_output.tmp vm2_output.tmp > $diff_tmp
 				if [ -s $diff_tmp ]; then
@@ -229,6 +237,7 @@ run_test()
 	printf "Success: ${GREEN}%4d/%d${RESET}\n" $count_success $nbr_of_players
 	printf "Failure: ${RED}%4d/%d${RESET}\n" $count_failure $nbr_of_players
 	printf "Timeout: ${YELLOW}%4d/%d${RESET}\n" $count_timeout $nbr_of_players
+	printf "Leaks:   ${YELLOW}%4d/%d${RESET}\n" $count_leaks $nbr_of_players
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
@@ -240,7 +249,7 @@ ASM="../corewar/corewar_resources/asm"
 
 RUN_ASM=0
 CLEAN_FIRST=0
-CHECK_LEAKS=1
+CHECK_LEAKS=0
 TIMEOUT_VALUE=10 #second
 OPT_A=""
 OPT_V=""
@@ -250,7 +259,7 @@ OPT_V_LIMIT_MAX=31
 STATUS_TIMEOUT=2
 STATUS_LEAKS=3
 
-while getopts "bchav:t:" opt
+while getopts "bchav:t:l" opt
 do
 	case "$opt" in
 		b)
@@ -266,6 +275,9 @@ do
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
 				TIMEOUT_VALUE=$OPTARG
 			fi
+			;;
+		l)
+			CHECK_LEAKS=1
 			;;
 		v)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
