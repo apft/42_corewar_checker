@@ -21,15 +21,15 @@ print_warning()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v N] [-t N] exec1 exec2 player"
-	printf "%s\n" "  - [-b]       convert player to bytecode first"
+	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v N] [-t N] exec player"
+	printf "%s\n" "  - [-b]       convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]       clean directory at first"
 	printf "%s\n" "  - [-a]       enable aff operator"
 	printf "%s\n" "  - [-v N]     verbose mode (mode should be between 0 and 31)"
 	printf "%s\n" "  - [-t N]     timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "  - [-h]       print this message and exit"
-	printf "%s\n" "  - exec       path to executable"
-	printf "%s\n" "  - player     player (.cor file)"
+	printf "%s\n" "  - exec       path to your executable"
+	printf "%s\n" "  - player     player (.cor file, or .s file with the -b option)"
 	exit
 }
 
@@ -43,12 +43,6 @@ check_executable()
 		printf "%s\n" "Executable ($1) not executable"
 		exit
 	fi
-}
-
-check_args()
-{
-	check_executable $1
-	check_executable $2
 }
 
 initialize_directory()
@@ -163,9 +157,9 @@ print_status_program()
 
 run_test()
 {
-	local vm1_exec=$1
-	local vm2_exec=$2
-	shift 2
+	local vm1_exec=$VM_42
+	local vm2_exec=$1
+	shift
 	local players=$@
 	local nbr_of_players=${#}
 	local vm1_status vm2_status
@@ -240,6 +234,8 @@ run_test()
 
 DIFF_DIR=".diff"
 LEAKS_DIR=".leaks"
+
+VM_42="./resources/42_corewar"
 ASM="../corewar/corewar_resources/asm"
 
 RUN_ASM=0
@@ -253,8 +249,6 @@ OPT_V_LIMIT_MAX=31
 
 STATUS_TIMEOUT=2
 STATUS_LEAKS=3
-
-VALGRIND_LOG=""
 
 while getopts "bchav:t:" opt
 do
@@ -290,10 +284,10 @@ do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -lt 3 ];then
+if [ $# -lt 2 ];then
 	print_usage_and_exit
 	exit
 fi
 clean_dir
-check_args $@
+check_executable $1
 run_test $@
