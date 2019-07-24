@@ -4,6 +4,7 @@ ASM_42="resources/asm_42"
 ASM_USR=""
 CHAMPIONS_FOLDER="test_champs"
 CHAMPIONS="`find ${CHAMPIONS_FOLDER} -type f`"
+CHAMPIONS+="/dev/null /dev/random /dev/urandom"
 
 # Colors
 RED='\x1b[0;31m'
