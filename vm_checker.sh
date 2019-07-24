@@ -24,6 +24,7 @@ print_usage_and_exit()
 	printf "%s\n" "Usage: ./vm_checker.sh [-bch] exec1 exec2 player"
 	printf "%s\n" "  - [-b]     convert player to bytecode first"
 	printf "%s\n" "  - [-c]     clean directory at first"
+	printf "%s\n" "  - [-a]     enable aff operator"
 	printf "%s\n" "  - [-h]     print this message and exit"
 	printf "%s\n" "  - exec     path to executable"
 	printf "%s\n" "  - player   player (.cor file)"
@@ -144,10 +145,10 @@ run_test()
 				player=`echo $player | rev | cut -d '.' -f 2 | rev`
 				player+=".cor"
 			fi
-			timeout_fct $vm1_exec vm1_output.tmp -v 31 $player 2> /dev/null
+			timeout_fct $vm1_exec vm1_output.tmp $OPT_A $OPT_V $player 2> /dev/null
 			vm1_status=$?
 			print_status_program $vm1_status
-			timeout_fct $vm2_exec vm2_output.tmp -v 31 $player 2> /dev/null
+			timeout_fct $vm2_exec vm2_output.tmp $OPT_A $OPT_V $player 2> /dev/null
 			vm2_status=$?
 			print_status_program $vm2_status
 			if [ $vm1_status -ne 0 -o $vm2_status -ne 0 ]; then
@@ -192,15 +193,20 @@ RUN_ASM=0
 CLEAN_FIRST=0
 TIMEOUT=20 #second
 TIMEOUT_STATUS=2
+OPT_A=""
+OPT_V="-v 31"
 
-while getopts "bch" o
+while getopts "bcha" opt
 do
-	case "${o}" in
+	case "${opt}" in
 		b)
 			RUN_ASM=1
 			;;
 		c)
 			CLEAN_FIRST=1
+			;;
+		a)
+			OPT_A="-a"
 			;;
 		h|*)
 			print_usage_and_exit
