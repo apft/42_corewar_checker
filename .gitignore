@@ -1,0 +1,23 @@
+# swap files
+*.sw*
+
+# bin
+*.out
+*.bin
+
+# libs
+*.a
+
+# .obj dirs
+.obj/
+
+# tag files
+tags
+
+# script output
+*.tmp
+.diff/
+.leaks/
+
+# debug
+*.dSYM
