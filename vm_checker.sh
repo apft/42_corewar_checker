@@ -146,11 +146,11 @@ get_status()
 	local status=$1
 	local leak_file=$2
 
-	[ $status -ne 0 ] && return $status
 	if [ $CHECK_LEAKS -ne 0 ]; then
 		check_leaks $leak_file
-		return $?
+		[ $? -eq $STATUS_LEAKS ] && return $STATUS_LEAKS
 	fi
+	[ $status -ne 0 ] && return $status
 	return 0
 }
 
