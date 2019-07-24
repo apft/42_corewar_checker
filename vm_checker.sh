@@ -21,13 +21,14 @@ print_warning()
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./vm_checker.sh [-bch] exec1 exec2 player"
-	printf "%s\n" "  - [-b]     convert player to bytecode first"
-	printf "%s\n" "  - [-c]     clean directory at first"
-	printf "%s\n" "  - [-a]     enable aff operator"
-	printf "%s\n" "  - [-h]     print this message and exit"
-	printf "%s\n" "  - exec     path to executable"
-	printf "%s\n" "  - player   player (.cor file)"
+	printf "%s\n" "Usage: ./vm_checker.sh [-bch] [-v mode] exec1 exec2 player"
+	printf "%s\n" "  - [-b]          convert player to bytecode first"
+	printf "%s\n" "  - [-c]          clean directory at first"
+	printf "%s\n" "  - [-a]          enable aff operator"
+	printf "%s\n" "  - [-v mode]     verbose mode (mode should be between 0 and 31)"
+	printf "%s\n" "  - [-h]          print this message and exit"
+	printf "%s\n" "  - exec          path to executable"
+	printf "%s\n" "  - player        player (.cor file)"
 	exit
 }
 
@@ -194,11 +195,13 @@ CLEAN_FIRST=0
 TIMEOUT=20 #second
 TIMEOUT_STATUS=2
 OPT_A=""
-OPT_V="-v 31"
+OPT_V=""
+OPT_V_LIMIT_MIN=0
+OPT_V_LIMIT_MAX=31
 
-while getopts "bcha" opt
+while getopts "bchav:" opt
 do
-	case "${opt}" in
+	case "$opt" in
 		b)
 			RUN_ASM=1
 			;;
@@ -207,6 +210,17 @@ do
 			;;
 		a)
 			OPT_A="-a"
+			;;
+		v)
+			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
+				if [ $OPTARG -ge $OPT_V_LIMIT_MIN -a $OPTARG -le $OPT_V_LIMIT_MAX ]; then
+					OPT_V="-v $OPTARG"
+				else
+					print_usage_and_exit
+				fi
+			else
+				print_usage_and_exit
+			fi
 			;;
 		h|*)
 			print_usage_and_exit
