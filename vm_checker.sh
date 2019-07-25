@@ -53,7 +53,7 @@ timeout_fct()
 	fi
 	# remove last 4 lines of file (added by the time command)
 	sed -i '' -e :a -e '$d;N;2,4ba' -e 'P;D' $tmp_out
-	return 0
+	return $STATUS_SUCCESS
 }
 
 get_contestants()
@@ -192,7 +192,7 @@ run_test()
 			vm1_status=$?
 			print_status $vm1_status
 			timeout_fct $vm2_exec $vm2_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
-			get_status $? $leak_file
+			get_status $? $vm2_output_tmp $leak_file
 			vm2_status=$?
 			print_status $vm2_status
 			if [ $vm1_status -ne 0 -o $vm2_status -ne 0 ]; then
@@ -201,6 +201,7 @@ run_test()
 				for vm_status in $vm1_status $vm2_status
 				do
 					[ $vm_status -eq 0 ] && printf "ok      "
+					[ $vm_status -eq $STATUS_SEGV ] && print_error "segfault "
 					[ $vm_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
 					[ $CHECK_LEAKS -ne 0 -a $vm_status -eq $STATUS_LEAKS ] && print_error "leaks    " && vm_leaks=1
 				done

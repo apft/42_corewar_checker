@@ -4,17 +4,16 @@ if [ -f colors.sh ]; then
 	. colors.sh
 fi
 
-
 STATUS_SUCCESS=0
 STATUS_TIMEOUT=2
 STATUS_LEAKS=3
 STATUS_ASM_FAILED=4
+STATUS_SEGV=139
 
 count_success=0
 count_failure=0
 count_timeout=0
 count_leaks=0
-
 
 print_ok()
 {
@@ -136,12 +135,24 @@ check_leaks()
 	return $STATUS_SUCCESS
 }
 
+check_segfault()
+{
+	local output=$1
+
+	if grep -Ei "$0:.+segmentation fault" $output > /dev/null; then
+		return $STATUS_SEGV
+	fi
+	return $STATUS_SUCCESS
+}
+
 get_status()
 {
 	local status=$1
-	local leak_file=$2
+	local output=$2
+	local leak_file=$3
 
 	[ $status -eq $STATUS_TIMEOUT ] && return $STATUS_TIMEOUT
+	check_segfault $output || return $STATUS_SEGV
 	if [ $CHECK_LEAKS -ne 0 ]; then
 		check_leaks $leak_file
 		[ $? -eq $STATUS_LEAKS ] && return $STATUS_LEAKS
