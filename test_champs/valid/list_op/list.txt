@@ -3,6 +3,9 @@
 01;live;dir value is neg;%-42
 01;live;dir value is big;%49859842
 01;live;dir value is small;%-49859842
+01;live;dir value is int min;%-2147483648
+01;live;dir value is int max;%2147483647
+01;live;dir value is uint max;%4294967295
 01;live;dir value is too big;%94837589436749859842
 01;live;dir value is too small;%-94837589436749859842
 
@@ -12,6 +15,9 @@
 02;ld;ind value is neg reg is valid;-42,r2
 02;ld;ind value is big reg is valid;49859842,r2
 02;ld;ind value is small reg is valid;-49859842,r2
+02;ld;ind value is int min reg is valid;-2147483648,r2
+02;ld;ind value is int max reg is valid;2147483647,r2
+02;ld;ind value is uint max reg is valid;4294967295,r2
 02;ld;ind value is too big reg is valid;94837589436749859842,r2
 02;ld;ind value is too small reg is valid;-94837589436749859842,r2
 02;ld;dir value is null reg is valid;%0,r2
@@ -20,6 +26,9 @@
 02;ld;dir value is neg reg is valid;%-42,r2
 02;ld;dir value is big reg is valid;%49859842,r2
 02;ld;dir value is small reg is valid;%-49859842,r2
+02;ld;dir value is int min reg is valid;%-2147483648,r2
+02;ld;dir value is int max reg is valid;%2147483647,r2
+02;ld;dir value is uint max reg is valid;%4294967295,r2
 02;ld;dir value is too big reg is valid;%94837589436749859842,r2
 02;ld;dir value is too small reg is valid;%-94837589436749859842,r2
 
@@ -33,6 +42,9 @@
 03;st;reg is invalid ind value is pos;r32,42 
 03;st;reg is valid reg is valid;r1,r2 
 03;st;reg is invalid reg is valid;r32,r2 
+03;st;reg is int min;r1,%-2147483648
+03;st;reg is int max;r1,%2147483647
+03;st;reg is uint max;%4294967295
 
 04;add;all registers are valid;r1,r1,r2
 04;add;first register is invalid;r32,r1,r2
@@ -53,6 +65,9 @@
 06;and;ind value is neg and two valid registers;-42,r1,r2
 06;and;ind value is big and two valid registers;49859842,r1,r2
 06;and;ind value is small and two valid registers;-49859842,r1,r2
+06;and;ind value is int min and two valid registers;-2147483648,r1,r2
+06;and;ind value is int max and two valid registers;2147483647,r1,r2
+06;and;ind value is uint max and two valid registers;4294967295,r1,r2
 06;and;ind value is too big and two valid registers;94837589436749859842,r1,r2
 06;and;ind value is too small and two valid registers;-94837589436749859842,r1,r2
 06;and;dir value is null and two valid registers;%0,r1,r2
@@ -60,6 +75,9 @@
 06;and;dir value is neg and two valid registers;%-42,r1,r2
 06;and;dir value is big and two valid registers;%49859842,r1,r2
 06;and;dir value is small and two valid registers;%-49859842,r1,r2
+06;and;dir value is int min and two valid registers;%-2147483648,r1,r2
+06;and;dir value is int max and two valid registers;%2147483647,r1,r2
+06;and;dir value is uint max and two valid registers;%4294967295,r1,r2
 06;and;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 06;and;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
@@ -72,6 +90,9 @@
 07;or;ind value is neg and two valid registers;-42,r1,r2
 07;or;ind value is big and two valid registers;49859842,r1,r2
 07;or;ind value is small and two valid registers;-49859842,r1,r2
+07;or;ind value is int min and two valid registers;-2147483648,r1,r2
+07;or;ind value is int max and two valid registers;2147483647,r1,r2
+07;or;ind value is uint max and two valid registers;4294967295,r1,r2
 07;or;ind value is too big and two valid registers;94837589436749859842,r1,r2
 07;or;ind value is too small and two valid registers;-94837589436749859842,r1,r2
 07;or;dir value is null and two valid registers;%0,r1,r2
@@ -79,6 +100,9 @@
 07;or;dir value is neg and two valid registers;%-42,r1,r2
 07;or;dir value is big and two valid registers;%49859842,r1,r2
 07;or;dir value is small and two valid registers;%-49859842,r1,r2
+07;or;dir value is int min and two valid registers;%-2147483648,r1,r2
+07;or;dir value is int max and two valid registers;%2147483647,r1,r2
+07;or;dir value is uint max and two valid registers;%4294967295,r1,r2
 07;or;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 07;or;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
@@ -91,6 +115,9 @@
 08;xor;ind value is neg and two valid registers;-42,r1,r2
 08;xor;ind value is big and two valid registers;49859842,r1,r2
 08;xor;ind value is small and two valid registers;-49859842,r1,r2
+08;xor;ind value is int min and two valid registers;-2147483648,r1,r2
+08;xor;ind value is int max and two valid registers;2147483647,r1,r2
+08;xor;ind value is uint max and two valid registers;4294967295,r1,r2
 08;xor;ind value is too big and two valid registers;94837589436749859842,r1,r2
 08;xor;ind value is too small and two valid registers;-94837589436749859842,r1,r2
 08;xor;dir value is null and two valid registers;%0,r1,r2
@@ -98,6 +125,9 @@
 08;xor;dir value is neg and two valid registers;%-42,r1,r2
 08;xor;dir value is big and two valid registers;%49859842,r1,r2
 08;xor;dir value is small and two valid registers;%-49859842,r1,r2
+08;xor;dir value is int min and two valid registers;%-2147483648,r1,r2
+08;xor;dir value is int max and two valid registers;%2147483647,r1,r2
+08;xor;dir value is uint max and two valid registers;%4294967295,r1,r2
 08;xor;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 08;xor;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
@@ -106,6 +136,9 @@
 09;zjmp;dir value is neg carry is one;%-42
 09;zjmp;dir value is big carry is one;%49859842
 09;zjmp;dir value is small carry is one;%-49859842
+09;zjmp;dir value is int min carry is one;%-2147483648,r2
+09;zjmp;dir value is int max carry is one;%2147483647,r2
+09;zjmp;dir value is uint max carry is one;%4294967295,r2
 09;zjmp;dir value is too big carry is one;%94837589436749859842
 09;zjmp;dir value is too small carry is one;%-94837589436749859842
 09;zjmp;dir value is null carry is null;%0;ld %1,r4
@@ -113,6 +146,9 @@
 09;zjmp;dir value is neg carry is null;%-42;ld %1,r4
 09;zjmp;dir value is big carry is null;%49859842;ld %1,r4
 09;zjmp;dir value is small carry is null;%-49859842;ld %1,r4
+09;zjmp;dir value is int min carry is null;%-2147483648,r2;ld %1,r4
+09;zjmp;dir value is int max carry is null;%2147483647,r2;ld %1,r4
+09;zjmp;dir value is uint max carry is null;%4294967295,r2;ld %1,r4
 09;zjmp;dir value is too big carry is null;%94837589436749859842;ld %1,r4
 09;zjmp;dir value is too small carry is null;%-94837589436749859842;ld %1,r4
 
@@ -124,6 +160,9 @@
 10;ldi;ind value is pos and two valid registers;42,r1,r2
 10;ldi;ind value is neg and two valid registers;-42,r1,r2
 10;ldi;ind value is big and two valid registers;49859842,r1,r2
+10;ldi;ind value is int min and two valid registers;-2147483648,r1,r2
+10;ldi;ind value is int max and two valid registers;2147483647,r1,r2
+10;ldi;ind value is uint max and two valid registers;4294967295,r1,r2
 10;ldi;ind value is small and two valid registers;-49859842,r1,r2
 10;ldi;ind value is too big and two valid registers;94837589436749859842,r1,r2
 10;ldi;ind value is too small and two valid registers;-94837589436749859842,r1,r2
@@ -132,6 +171,9 @@
 10;ldi;dir value is neg and two valid registers;%-42,r1,r2
 10;ldi;dir value is big and two valid registers;%49859842,r1,r2
 10;ldi;dir value is small and two valid registers;%-49859842,r1,r2
+10;ldi;dir value is int min and two valid registers;%-2147483648,r1,r2
+10;ldi;dir value is int max and two valid registers;%2147483647,r1,r2
+10;ldi;dir value is uint max and two valid registers;%4294967295,r1,r2
 10;ldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 10;ldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
@@ -144,6 +186,9 @@
 11;sti;ind value is neg and two valid registers;r1,-42,r2
 11;sti;ind value is big and two valid registers;r1,49859842,r2
 11;sti;ind value is small and two valid registers;r1,-49859842,r2
+11;sti;ind value is int min and two valid registers;r1,-2147483648,r2
+11;sti;ind value is int max and two valid registers;r1,2147483647,r2
+11;sti;ind value is uint max and two valid registers;r1,4294967295,r2
 11;sti;ind value is too big and two valid registers;r1,94837589436749859842,r2
 11;sti;ind value is too small and two valid registers;r1,-94837589436749859842,r2
 11;sti;dir value is null and two valid registers;r1,%0,r2
@@ -151,12 +196,18 @@
 11;sti;dir value is neg and two valid registers;r1,%-42,r2
 11;sti;dir value is big and two valid registers;r1,%49859842,r2
 11;sti;dir value is small and two valid registers;r1,%-49859842,r2
+11;sti;dir value is int min and two valid registers;r1,%-2147483648,r2
+11;sti;dir value is int max and two valid registers;r1,%2147483647,r2
+11;sti;dir value is uint max and two valid registers;r1,%4294967295,r2
 11;sti;dir value is too big and two valid registers;r1,%94837589436749859842,r2
 11;sti;dir value is too small and two valid registers;r1,%-94837589436749859842,r2
 11;sti;two valid registers and dir value is null;r1,r2,%0
 11;sti;two valid registers and dir value is pos;r1,r2,%42
 11;sti;two valid registers and dir value is neg;r1,r2,%-42
 11;sti;two valid registers and dir value is big;r1,r2,%49859842
+11;sti;two valid registers dir value is int min;r1,r2,%-2147483648
+11;sti;two valid registers dir value is int max;r1,r2,%2147483647
+11;sti;two valid registers dir value is uint max;r1,r2,%4294967295
 11;sti;two valid registers and dir value is small;r1,r2,%-49859842
 11;sti;two valid registers and dir value is too big;r1,r2,%94837589436749859842
 11;sti;two valid registers and dir value is too small;r1,r2,%-94837589436749859842
@@ -166,6 +217,9 @@
 12;fork;dir value is neg;%-42
 12;fork;dir value is big;%49859842
 12;fork;dir value is small;%-49859842
+12;fork;dir value is int min;%-2147483648
+12;fork;dir value is int max;%2147483647
+12;fork;dir value is uint max;%4294967295
 12;fork;dir value is too big;%94837589436749859842
 12;fork;dir value is too small;%-94837589436749859842
 
@@ -175,6 +229,9 @@
 13;lld;ind value is neg reg is valid;-42,r2
 13;lld;ind value is big reg is valid;49859842,r2
 13;lld;ind value is small reg is valid;-49859842,r2
+13;lld;ind value is int min reg is valid;-2147483648,r2
+13;lld;ind value is int max reg is valid;2147483647,r2
+13;lld;ind value is uint max reg is valid;4294967295,r2
 13;lld;ind value is too big reg is valid;94837589436749859842,r2
 13;lld;ind value is too small reg is valid;-94837589436749859842,r2
 13;lld;dir value is null reg is valid;%0,r2
@@ -183,6 +240,9 @@
 13;lld;dir value is neg reg is valid;%-42,r2
 13;lld;dir value is big reg is valid;%49859842,r2
 13;lld;dir value is small reg is valid;%-49859842,r2
+13;lld;dir value is int min reg is valid;%-2147483648,r2
+13;lld;dir value is int max reg is valid;%2147483647,r2
+13;lld;dir value is uint max reg is valid;%4294967295,r2
 13;lld;dir value is too big reg is valid;%94837589436749859842,r2
 13;lld;dir value is too small reg is valid;%-94837589436749859842,r2
 
@@ -195,6 +255,9 @@
 14;lldi;ind value is neg and two valid registers;-42,r1,r2
 14;lldi;ind value is big and two valid registers;49859842,r1,r2
 14;lldi;ind value is small and two valid registers;-49859842,r1,r2
+14;lldi;ind value is int min and two valid registers;-2147483648,r1,r2
+14;lldi;ind value is int max and two valid registers;2147483647,r1,r2
+14;lldi;ind value is uint max and two valid registers;4294967295,r1,r2
 14;lldi;ind value is too big and two valid registers;94837589436749859842,r1,r2
 14;lldi;ind value is too small and two valid registers;-94837589436749859842,r1,r2
 14;lldi;dir value is null and two valid registers;%0,r1,r2
@@ -202,6 +265,9 @@
 14;lldi;dir value is neg and two valid registers;%-42,r1,r2
 14;lldi;dir value is big and two valid registers;%49859842,r1,r2
 14;lldi;dir value is small and two valid registers;%-49859842,r1,r2
+14;lldi;dir value is int min and two valid registers;%-2147483648,r1,r2
+14;lldi;dir value is int max and two valid registers;%2147483647,r1,r2
+14;lldi;dir value is uint max and two valid registers;%4294967295,r1,r2
 14;lldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 14;lldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
 
@@ -210,6 +276,9 @@
 15;lfork;dir value is neg;%-42
 15;lfork;dir value is big;%49859842
 15;lfork;dir value is small;%-49859842
+15;lfork;dir value is int min;%-2147483648
+15;lfork;dir value is int max;%2147483647
+15;lfork;dir value is uint max;%4294967295
 15;lfork;dir value is too big;%94837589436749859842
 15;lfork;dir value is too small;%-94837589436749859842
 
