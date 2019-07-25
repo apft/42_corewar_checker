@@ -138,7 +138,7 @@ LEAKS_DIR=".leaks"
 DIRS="$DIFF_DIR $LEAKS_DIR"
 
 VM_42="./resources/42_corewar"
-ASM="../corewar/corewar_resources/asm"
+ASM="resources/42_asm"
 
 RUN_ASM=0
 CLEAN_FIRST=0

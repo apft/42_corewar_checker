@@ -103,7 +103,7 @@ run_checks()
 	rm $output_42 $output_usr $bytecode_42 $bytecode_usr
 }
 
-ASM_42="resources/asm_42"
+ASM_42="resources/42_asm"
 ASM_USR=""
 CHAMPIONS_FOLDER="test_champs"
 CHAMPIONS_DEV="/dev/null /dev/random /dev/urandom"
