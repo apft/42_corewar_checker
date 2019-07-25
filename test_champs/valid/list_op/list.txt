@@ -136,9 +136,9 @@
 09;zjmp;dir value is neg carry is one;%-42
 09;zjmp;dir value is big carry is one;%49859842
 09;zjmp;dir value is small carry is one;%-49859842
-09;zjmp;dir value is int min carry is one;%-2147483648,r2
-09;zjmp;dir value is int max carry is one;%2147483647,r2
-09;zjmp;dir value is uint max carry is one;%4294967295,r2
+09;zjmp;dir value is int min carry is one;%-2147483648
+09;zjmp;dir value is int max carry is one;%2147483647
+09;zjmp;dir value is uint max carry is one;%4294967295
 09;zjmp;dir value is too big carry is one;%94837589436749859842
 09;zjmp;dir value is too small carry is one;%-94837589436749859842
 09;zjmp;dir value is null carry is null;%0;ld %1,r4
@@ -146,9 +146,9 @@
 09;zjmp;dir value is neg carry is null;%-42;ld %1,r4
 09;zjmp;dir value is big carry is null;%49859842;ld %1,r4
 09;zjmp;dir value is small carry is null;%-49859842;ld %1,r4
-09;zjmp;dir value is int min carry is null;%-2147483648,r2;ld %1,r4
-09;zjmp;dir value is int max carry is null;%2147483647,r2;ld %1,r4
-09;zjmp;dir value is uint max carry is null;%4294967295,r2;ld %1,r4
+09;zjmp;dir value is int min carry is null;%-2147483648;ld %1,r4
+09;zjmp;dir value is int max carry is null;%2147483647;ld %1,r4
+09;zjmp;dir value is uint max carry is null;%4294967295;ld %1,r4
 09;zjmp;dir value is too big carry is null;%94837589436749859842;ld %1,r4
 09;zjmp;dir value is too small carry is null;%-94837589436749859842;ld %1,r4
 
