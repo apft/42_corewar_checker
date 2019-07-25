@@ -27,8 +27,12 @@ run_tests(){
 			min=$cycle
 		fi
 	done
-	printf "Dump differs at cycle %d\n" $max
-	run_test $VM1_EXEC $VM2_EXEC $PLAYER $max 31
+	if [ $max -eq $nb_of_cycles ]; then
+		printf "Same dump output\n"
+	else
+		printf "Dump differs at cycle %d\n" $max
+		run_test $VM1_EXEC $VM2_EXEC $PLAYER $max 31
+	fi
 }
 
 VM1_EXEC=$1
