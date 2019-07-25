@@ -37,14 +37,14 @@
 03;st;reg is valid ind value is neg;r1,-42 
 03;st;reg is valid ind value is big;r1,49859842
 03;st;reg is valid ind value is small;r1,-49859842
+03;st;reg is valid ind value is int min;r1,-2147483648
+03;st;reg is valid ind value is int max;r1,2147483647
+03;st;reg is valid ind value is uint max;r1,4294967295
 03;st;reg is valid ind value is too big;r1,94837589436749859842
 03;st;reg is valid ind value is too small;r1,-94837589436749859842 
 03;st;reg is invalid ind value is pos;r32,42 
 03;st;reg is valid reg is valid;r1,r2 
 03;st;reg is invalid reg is valid;r32,r2 
-03;st;reg is int min;r1,%-2147483648
-03;st;reg is int max;r1,%2147483647
-03;st;reg is uint max;%4294967295
 
 04;add;all registers are valid;r1,r1,r2
 04;add;first register is invalid;r32,r1,r2
