@@ -9,7 +9,7 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] exec player"
+	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] exec player..."
 	printf "%s\n" "  - [-b]       convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]       clean directory at first"
 	printf "%s\n" "  - [-a]       enable aff operator"
@@ -17,17 +17,12 @@ print_usage_and_exit()
 	printf "%s\n" "  - [-t N]     timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "  - [-l]       check for leaks"
 	printf "%s\n" "  - [-h]       print this message and exit"
+	printf "%s\n" "  - [-f N]     run N fights"
+	printf "%s\n" "                  if enabled use the set of players to randomly populate"
+	printf "%s\n" "                  the arena with 2, 3 or 4 players and let them fight."
 	printf "%s\n" "  - exec       path to your executable"
 	printf "%s\n" "  - player     player (.cor file, or .s file with the -b option)"
 	exit
-}
-
-create_filename()
-{
-	local player=$1
-	local suffix=$2
-
-	basename $player.$suffix.$(date "+%Y%M%d%H%M")
 }
 
 timeout_fct()
@@ -61,42 +56,142 @@ timeout_fct()
 	return 0
 }
 
+get_contestants()
+{
+	local nbr_of_contestants=$1
+	local nbr_of_players=$2
+	shift 2
+	local list_contestants=""
+	local contestant
+	local index=$nbr_of_players
+
+	for i in `seq $nbr_of_contestants`
+	do
+		[ $nbr_of_players -gt 1 ] && index=$((RANDOM % nbr_of_players + 1))
+		contestant="$(eval echo \${$index})"
+		list_contestants+="$contestant "
+	done
+	printf "$list_contestants"
+}
+
+create_list_fights()
+{
+	local players=$@
+	local nbr_of_players=$#
+	local set_players=""
+	local contestants=""
+
+	for i in `seq $NBR_OF_FIGHTS`
+	do
+		local nbr_of_contestants=$((RANDOM % 3 + 2))
+		contestants="`get_contestants $nbr_of_contestants $nbr_of_players $players`"
+		set_players+="$contestants;`get_basename $contestants`\n"
+	done
+	printf "$set_players"
+}
+
+get_list_fights()
+{
+	if [ $MODE -eq $MODE_FIGHT ]; then
+		create_list_fights $@
+	else
+		echo "$@"
+	fi
+}
+
+create_list_asm()
+{
+	local items=$@
+	local list_asm=""
+
+	for item in $items
+	do
+		list_asm+="`echo $item | rev | cut -d '.' -f 2- | rev`"
+		list_asm+=".cor "
+	done
+	printf "$list_asm"
+}
+
+run_asm()
+{
+	local files=$@
+
+	for file in $files
+	do
+		$ASM $file > /dev/null 2>&1
+		[ $? -ne 0 ] && return $STATUS_ASM_FAILED
+	done
+	return $STATUS_SUCCESS
+}
+
 run_test()
 {
 	local vm1_exec=$VM_42
 	local vm2_exec=$1
 	shift
 	local players=$@
-	local nbr_of_players=${#}
-	local vm1_status vm2_status
+	local nbr_of_players=$#
+	local vm1_output_tmp="/tmp/corewar_checker_vm1_output.tmp"
+	local vm2_output_tmp="/tmp/corewar_checker_vm2_output.tmp"
 	local diff_tmp="diff_output.tmp"
+	local list_asm full_paths only_names
 	local diff_file leak_file
-	local first_column_width=`compute_column_width $players`
-	
-	for player in $players
+	local status vm1_status vm2_status
+
+	local old_IFS=$IFS
+	local new_IFS=$'\n'
+
+	local list_fights=`get_list_fights $players`
+	local first_column_width
+	if [ $MODE -eq $MODE_FIGHT ]; then
+		IFS=$new_IFS
+		only_names="`echo "$list_fights" | cut -d ';' -f 2`"
+		first_column_width=`compute_column_width $only_names`
+	else
+		first_column_width=`compute_column_width $list_fights`
+	fi
+
+	local i=0
+	for fight in $list_fights
 	do
-		printf "%-*s  " $first_column_width $player
-		if [ ! -f $player ]; then
-			printf "${YELLOW}%s${RESET}\n" "Player ($player) not found\n"
+		IFS=$old_IFS
+		((i++))
+		case $MODE in
+			$MODE_FIGHT)
+				full_paths=`echo $fight | cut -d ';' -f 1`
+				only_names=`echo $fight | cut -d ';' -f 2`
+				printf "%3d: %-*s  " $i $first_column_width "$only_names"
+				;;
+			*)
+				full_paths=$fight
+				only_names=`basename $fight`
+				printf "%-*s  " $first_column_width "$fight"
+				;;
+		esac
+		check_valid_file $list_contestants
+		if [ $? -ne 0 ]; then
 			((count_failure++))
 		else
-			leak_file=$LEAKS_DIR/`create_filename $player "leak"`
+			tmp_file=`echo $only_names | sed -E 's/( )+/_-_/g'`
+			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
 			if [ $RUN_ASM -eq 1 ]; then
-				$ASM $player > /dev/null 2>&1
-				if [ $? -ne 0 ]; then
-					print_status $STATUS_ASM_FAILED
-					print_status $STATUS_ASM_FAILED
+				run_asm $full_paths
+				status=$?
+				if [ $status -ne $STATUS_SUCCESS ]; then
+					print_status $status
+					print_status $status
 					printf "Could not convert to ASM\n"
 					((count_failure++))
 					continue
 				fi
-				player=`echo $player | rev | cut -d '.' -f 2 | rev`
-				player+=".cor"
+				list_asm="`create_list_asm $full_paths`"
+			else
+				list_asm="$full_paths"
 			fi
-			timeout_fct $vm1_exec vm1_output.tmp $leak_file $OPT_A $OPT_V $player 2> /dev/null
+			timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 			vm1_status=$?
 			print_status $vm1_status
-			timeout_fct $vm2_exec vm2_output.tmp $leak_file $OPT_A $OPT_V $player 2> /dev/null
+			timeout_fct $vm2_exec $vm2_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 			get_status $? $leak_file
 			vm2_status=$?
 			print_status $vm2_status
@@ -112,22 +207,25 @@ run_test()
 				[ $vm_timeout -eq 1 ] && ((count_timeout++))
 				[ $vm_leaks -eq 1 ] && ((count_leaks++))
 			else
-				diff vm1_output.tmp vm2_output.tmp > $diff_tmp
+				diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
 				if [ -s $diff_tmp ]; then
 					((count_failure++))
-					diff_file=$DIFF_DIR/`create_filename $player "diff"`
-					diff -y vm1_output.tmp vm2_output.tmp > $diff_file
+					diff_file=$DIFF_DIR/`create_filename $tmp_file "diff"`
+					diff -y $vm1_output_tmp $vm2_output_tmp > $diff_file
 					print_error "Booo!"
 					printf " see $diff_file"
 				else
 					((count_success++))
 					print_ok "Good!"
 				fi
+				rm $vm1_output_tmp $vm2_output_tmp
 			fi
 			printf "\n"
-			[ $RUN_ASM -eq 1 ] && rm $player
+			[ $RUN_ASM -eq 1 ] && rm $list_asm
 		fi
+		IFS=$new_IFS
 	done
+	IFS=$old_IFS
 	printf "\n"
 	print_summary $nbr_of_players
 	[ -f $diff_tmp ] && rm $diff_tmp
@@ -149,8 +247,13 @@ OPT_A=""
 OPT_V=""
 OPT_V_LIMIT_MIN=0
 OPT_V_LIMIT_MAX=31
+NBR_OF_FIGHTS=0
 
-while getopts "bchav:t:l" opt
+MODE_NORMAL=0
+MODE_FIGHT=1
+MODE=$MODE_NORMAL
+
+while getopts "bchav:t:lf:" opt
 do
 	case "$opt" in
 		b)
@@ -179,6 +282,15 @@ do
 				fi
 			else
 				print_usage_and_exit
+			fi
+			;;
+		f)
+			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
+				printf "Fight mode enabled.\n"
+				MODE=$MODE_FIGHT
+				NBR_OF_FIGHTS=$OPTARG
+			else
+				printf "Invalid number or fight, fight mode disabled...\n"
 			fi
 			;;
 		h|*)

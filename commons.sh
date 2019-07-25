@@ -43,6 +43,14 @@ check_executable()
 	fi
 }
 
+create_filename()
+{
+	local name=$1
+	local suffix=$2
+
+	basename $name.$suffix.$(date "+%Y%M%d%H%M")
+}
+
 initialize_dir()
 {
 	for dir in $@
@@ -60,6 +68,30 @@ clean_dir()
 	do
 		[ -d $dir ] && rm -R $dir
 	done
+}
+
+check_valid_file()
+{
+	for file in $@
+	do
+		if [ ! -f $file ]; then
+			printf "${YELLOW}%s${RESET}\n" "File ($file) not found\n"
+			return 1
+		fi
+	done
+	return 0
+}
+
+get_basename()
+{
+	local output=""
+
+	for file in $@
+	do
+		output+=`basename $file | tr -d '\n'`
+		output+="  "
+	done
+	printf "$output" | sed 's/ +$//'
 }
 
 compute_column_width()
