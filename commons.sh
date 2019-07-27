@@ -162,6 +162,7 @@ print_status()
 print_summary()
 {
 	local nbr_of_players=$1
+
 	printf "Success: ${GREEN}%4d/%d${RESET}\n" $count_success $nbr_of_players
 	printf "Failure: ${RED}%4d/%d${RESET}\n" $count_failure $nbr_of_players
 	if [ $CHECK_LEAKS -ne 0 ]; then
