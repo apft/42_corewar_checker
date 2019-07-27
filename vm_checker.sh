@@ -190,7 +190,7 @@ run_test()
 		IFS=$old_IFS
 		((i++))
 		case $MODE in
-			$MODE_FIGHT)
+			$MODE_FIGHT | $MODE_FIGHT_RANDOM)
 				full_paths=`echo $fight | cut -d ';' -f 1`
 				only_names=`echo $fight | cut -d ';' -f 2`
 				printf "%3d: %-*s  " $i $first_column_width "$only_names"
