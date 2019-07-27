@@ -9,15 +9,17 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
+	printf "%s\n" "Usage: ./$0 [-bchld] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
 	printf "%s\n" "  - [-b]               convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]               clean directory at first"
 	printf "%s\n" "  - [-a]               enable aff operator"
 	printf "%s\n" "  - [-v N]             verbose mode (mode should be between 0 and 31)"
 	printf "%s\n" "  - [-t N]             timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "  - [-l]               check for leaks"
+	printf "%s\n" "  - [-d]               enable diff mode (incompatible with -f)"
+	printf "%s\n" "  -                       compare exec output with corewar exec provided by 42 (zaz's corewar)"
 	printf "%s\n" "  - [-h]               print this message and exit"
-	printf "%s\n" "  - [-f N]             enable fight mode, run N fights"
+	printf "%s\n" "  - [-f N]             enable fight mode, run N fights (incompatible with -d)"
 	printf "%s\n" "                          if enabled use the set of players to randomly populate"
 	printf "%s\n" "                          the arena with 2, 3 or 4 players and let them fight,"
 	printf "%s\n" "                          each player is unique in the arena"
@@ -33,7 +35,7 @@ print_winner()
 {
 	local output=$1
 
-	printf "  "
+	printf "    "
 	tail -n 1 $output | tr -d '\n'
 }
 
@@ -221,46 +223,49 @@ run_test()
 			else
 				list_asm="$full_paths"
 			fi
-			timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
-			vm1_status=$?
-			print_status $vm1_status
+			if [ $MODE -eq $MODE_DIFF ]; then
+				timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
+				vm1_status=$?
+				print_status $vm1_status
+			fi
 			timeout_fct $vm2_exec $vm2_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 			get_status $? $vm2_output_tmp $leak_file
 			vm2_status=$?
 			print_status $vm2_status
-			if [ $vm1_status -ne 0 -o $vm2_status -ne 0 ]; then
-				local vm_timeout=0
-				local vm_leaks=0
-				for vm_status in $vm1_status $vm2_status
-				do
-					[ $vm_status -eq 0 ] && printf "ok      "
-					[ $vm_status -eq $STATUS_SEGV ] && print_error "segfault "
-					[ $vm_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
-					[ $CHECK_LEAKS -ne 0 -a $vm_status -eq $STATUS_LEAKS ] && print_error "leaks    " && vm_leaks=1
-				done
-				[ $vm_timeout -eq 1 ] && ((count_timeout++))
-				[ $vm_leaks -eq 1 ] && ((count_leaks++))
-			else
-				diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
-				if [ -s $diff_tmp ]; then
-					((count_failure++))
-					diff_file=$DIFF_DIR/`create_filename $tmp_file "diff"`
-					diff -y $vm1_output_tmp $vm2_output_tmp > $diff_file
-					print_error "Booo!"
-					printf " see $diff_file"
-				else
-					((count_success++))
-					print_ok "Good!"
-					print_winner $vm1_output_tmp
-					if [ ! -z "$FIXED_CONTESTANT" ]; then
-						if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
-							((nbr_of_win_fixed_contestant++))
+			local vm_timeout=0
+			local vm_leaks=0
+			if [ $MODE -eq $MODE_DIFF ]; then
+				if [ $vm1_status -eq 0 -a $vm2_status -eq 0 ]; then
+					diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
+					if [ -s $diff_tmp ]; then
+						((count_failure++))
+						diff_file=$DIFF_DIR/`create_filename $tmp_file "diff"`
+						diff -y $vm1_output_tmp $vm2_output_tmp > $diff_file
+						print_error "Booo!"
+						printf " see $diff_file"
+					else
+						((count_success++))
+						print_ok "Good!"
+						print_winner $vm1_output_tmp
+						if [ ! -z "$FIXED_CONTESTANT" ]; then
+							if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
+								((nbr_of_win_fixed_contestant++))
+							fi
 						fi
 					fi
 				fi
-				rm $vm1_output_tmp $vm2_output_tmp
+				[ $vm1_status -eq 0 ] && printf "ok      "
+				[ $vm1_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
+				rm $vm1_output_tmp
 			fi
+			[ $vm2_status -eq 0 ] && printf "ok"
+			[ $vm2_status -eq $STATUS_SEGV ] && print_error "segfault" && vm_timeout=1
+			[ $vm2_status -eq $STATUS_TIMEOUT ] && print_error "timeout" && vm_timeout=1
+			[ $CHECK_LEAKS -ne 0 -a $vm2_status -eq $STATUS_LEAKS ] && print_error "leaks" && vm_leaks=1
 			printf "\n"
+			[ $vm_timeout -eq 1 ] && ((count_timeout++))
+			[ $vm_leaks -eq 1 ] && ((count_leaks++))
+			rm $vm2_output_tmp
 			[ $RUN_ASM -eq 1 ] && rm $list_asm
 		fi
 		IFS=$new_IFS
@@ -292,8 +297,9 @@ OPT_V_LIMIT_MIN=0
 OPT_V_LIMIT_MAX=31
 
 MODE_NORMAL=0
-MODE_FIGHT=1
-MODE_FIGHT_RANDOM=2
+MODE_DIFF=1
+MODE_FIGHT=2
+MODE_FIGHT_RANDOM=3
 MODE=$MODE_NORMAL
 
 NBR_OF_FIGHTS=0
@@ -301,7 +307,7 @@ NBR_OF_CONTESTANTS=-1
 FIXED_CONTESTANT=""
 FIXED_CONTESTANT_NAME=""
 
-while getopts "bchav:t:lf:F:m:p:" opt
+while getopts "bchadv:t:lf:F:m:p:" opt
 do
 	case "$opt" in
 		b)
@@ -321,6 +327,15 @@ do
 		l)
 			CHECK_LEAKS=1
 			;;
+		d)
+			case $MODE in
+				$MODE_FIGHT | $MODE_FIGHT_RANDOM)
+					printf "%s\n\n" "Error: fight mode already enabled"
+					print_usage_and_exit
+					;;
+			esac
+			MODE=$MODE_DIFF
+			;;
 		v)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
 				if [ $OPTARG -ge $OPT_V_LIMIT_MIN -a $OPTARG -le $OPT_V_LIMIT_MAX ]; then
@@ -335,6 +350,12 @@ do
 			fi
 			;;
 		f|F)
+			case $MODE in
+				$MODE_DIFF)
+					printf "%s\n\n" "Error: diff mode already enabled"
+					print_usage_and_exit
+					;;
+			esac
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
 				printf "Fight mode enabled.\n"
 				[ "$opt" = "r" ] && MODE=$MODE_FIGHT_RANDOM || MODE=$MODE_FIGHT
