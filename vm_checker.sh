@@ -9,7 +9,7 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] exec player..."
+	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
 	printf "%s\n" "  - [-b]               convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]               clean directory at first"
 	printf "%s\n" "  - [-a]               enable aff operator"
@@ -23,6 +23,7 @@ print_usage_and_exit()
 	printf "%s\n" "                          each player is unique in the arena"
 	printf "%s\n" "  - [-F N]             same as -f except that a player can fight against himself"
 	printf "%s\n" "  - [-m <1|2|3|4>]     set the maximum number of contestants (only works in fight mode)"
+	printf "%s\n" "  - [-p <player>]      define a fixed contestant that will appear in all fights"
 	printf "%s\n" "  - exec               path to your executable"
 	printf "%s\n" "  - player             player (.cor file, or .s file with the -b option)"
 	exit
@@ -75,11 +76,16 @@ get_contestants()
 	local list_contestants=""
 	local contestant=""
 	local index=$nbr_of_players
+	local index_fixed=-1
 
-	for i in `seq $nbr_of_contestants`
-	do
-		[ $nbr_of_players -gt 1 ] && index=$((RANDOM % nbr_of_players + 1))
-		contestant="$(eval echo \${$index})"
+	[ ! -z "$FIXED_CONTESTANT" ] && index_fixed=$((RANDOM % nbr_of_contestants + 1))
+	while [ $nbr_of_contestants -gt 0 ]; do
+		if [ $nbr_of_contestants -eq $index_fixed ]; then
+			contestant=$FIXED_CONTESTANT
+		else
+			[ $nbr_of_players -gt 1 ] && index=$((RANDOM % nbr_of_players + 1))
+			contestant="$(eval echo \${$index})"
+		fi
 		if [ $MODE -ne $MODE_FIGHT_RANDOM ]; then
 			while echo $list_contestants | grep $contestant > /dev/null;
 			do
@@ -88,6 +94,7 @@ get_contestants()
 			done
 		fi
 		list_contestants+="$contestant "
+		((nbr_of_contestants--))
 	done
 	printf "$list_contestants"
 }
@@ -279,7 +286,7 @@ NBR_OF_FIGHTS=0
 NBR_OF_CONTESTANTS=0
 FIXED_CONTESTANT=""
 
-while getopts "bchav:t:lf:F:m:" opt
+while getopts "bchav:t:lf:F:m:p:" opt
 do
 	case "$opt" in
 		b)
@@ -326,6 +333,13 @@ do
 				print_usage_and_exit
 			fi
 			;;
+		p)
+			if [ ! -f $OPTARG ]; then
+				printf "The provided player (-p) is not a valid file: %s\n" $OPTARG
+				exit
+			fi
+			FIXED_CONTESTANT=$OPTARG
+			;;
 		h|*)
 			print_usage_and_exit
 			;;
@@ -341,7 +355,13 @@ if [ $# -lt 2 ]; then
 	print_usage_and_exit
 fi
 
-if [ $NBR_OF_CONTESTANTS -gt $(($# - 1)) ]; then
+NBR_OF_PLAYERS=$(($# - 1))
+if [ ! -z $FIXED_CONTESTANT ]; then
+	if ! echo $@ | grep $FIXED_CONTESTANT > /dev/null; then
+		((NBR_OF_PLAYERS++))
+	fi
+fi
+if [ $NBR_OF_CONTESTANTS -gt $NBR_OF_PLAYERS ]; then
 	printf "The provided set of %s players is to small to generate fights with %s contestants.\n" $(($# - 1)) $NBR_OF_CONTESTANTS
 	exit
 fi
