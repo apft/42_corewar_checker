@@ -17,7 +17,7 @@ print_usage_and_exit()
 	printf "%s\n" "  - [-t N]             timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "  - [-l]               check for leaks"
 	printf "%s\n" "  - [-d]               enable diff mode (incompatible with -f)"
-	printf "%s\n" "  -                       compare exec output with corewar exec provided by 42 (zaz's corewar)"
+	printf "%s\n" "                          compare exec output with corewar exec provided by 42 (zaz's corewar)"
 	printf "%s\n" "  - [-h]               print this message and exit"
 	printf "%s\n" "  - [-f N]             enable fight mode, run N fights (incompatible with -d)"
 	printf "%s\n" "                          if enabled use the set of players to randomly populate"
