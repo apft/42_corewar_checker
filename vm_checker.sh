@@ -17,13 +17,13 @@ print_usage_and_exit()
 	printf "%s\n" "  - [-t N]             timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "  - [-l]               check for leaks"
 	printf "%s\n" "  - [-h]               print this message and exit"
-	printf "%s\n" "  - [-f N]             run N fights"
+	printf "%s\n" "  - [-f N]             enable fight mode, run N fights"
 	printf "%s\n" "                          if enabled use the set of players to randomly populate"
 	printf "%s\n" "                          the arena with 2, 3 or 4 players and let them fight,"
 	printf "%s\n" "                          each player is unique in the arena"
 	printf "%s\n" "  - [-F N]             same as -f except that a player can fight against himself"
-	printf "%s\n" "  - [-m <1|2|3|4>]     set the maximum number of contestants (only works in fight mode)"
-	printf "%s\n" "  - [-p <player>]      define a fixed contestant that will appear in all fights"
+	printf "%s\n" "  - [-m <1|2|3|4>]     set the maximum number of contestants (works only in fight mode)"
+	printf "%s\n" "  - [-p <player>]      define a fixed contestant that will appear in all fights (works only in fight mode)"
 	printf "%s\n" "  - exec               path to your executable"
 	printf "%s\n" "  - player             player (.cor file, or .s file with the -b option)"
 	exit
@@ -325,9 +325,11 @@ do
 				if [ $OPTARG -ge $OPT_V_LIMIT_MIN -a $OPTARG -le $OPT_V_LIMIT_MAX ]; then
 					OPT_V="-v $OPTARG"
 				else
+					printf "%s\n\n" "Error: -v arg should be between $OPT_V_LIMIT_MIN and $OPT_V_LIMIT_MAX"
 					print_usage_and_exit
 				fi
 			else
+				printf "%s\n\n" "Error: -v arg should be a number"
 				print_usage_and_exit
 			fi
 			;;
@@ -344,6 +346,7 @@ do
 			if echo $OPTARG | grep -E "^[1-4]$" > /dev/null 2>&1; then
 				NBR_OF_CONTESTANTS=$OPTARG
 			else
+				printf "%s\n\n" "Error: -m arg should be between 1 and 4"
 				print_usage_and_exit
 			fi
 			;;
@@ -364,6 +367,7 @@ shift $((OPTIND - 1))
 
 if [ $MODE -eq $MODE_NORMAL ]; then
 	if [ $NBR_OF_CONTESTANTS -ne -1 -o ! -z $FIXED_CONTESTANT ]; then
+		printf "%s\n\n" "Error: fight mode not enabled..."
 		print_usage_and_exit
 	fi
 fi
