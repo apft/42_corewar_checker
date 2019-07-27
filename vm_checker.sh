@@ -105,12 +105,14 @@ create_list_fights()
 	local nbr_of_players=$#
 	local set_players=""
 	local contestants=""
-	local nbr_of_contestants=$NBR_OF_CONTESTANTS
+	local nbr_of_contestants=0
 
 	for i in `seq $NBR_OF_FIGHTS`
 	do
-		if [ $nbr_of_contestants -eq 0 ]; then
+		if [ $NBR_OF_CONTESTANTS -eq -1 ]; then
 			nbr_of_contestants=$((RANDOM % 3 + 2))
+		else
+			nbr_of_contestants=$NBR_OF_CONTESTANTS
 		fi
 		contestants="`get_contestants $nbr_of_contestants $nbr_of_players $players`"
 		set_players+="$contestants;`get_basename $contestants`\n"
@@ -285,7 +287,7 @@ MODE_FIGHT_RANDOM=2
 MODE=$MODE_NORMAL
 
 NBR_OF_FIGHTS=0
-NBR_OF_CONTESTANTS=0
+NBR_OF_CONTESTANTS=-1
 FIXED_CONTESTANT=""
 
 while getopts "bchav:t:lf:F:m:p:" opt
@@ -358,8 +360,8 @@ if [ $# -lt 2 ]; then
 fi
 
 NBR_OF_PLAYERS=$(($# - 1))
-if [ ! -z $FIXED_CONTESTANT ]; then
-	if ! echo $@ | grep $FIXED_CONTESTANT > /dev/null; then
+if [ ! -z "$FIXED_CONTESTANT" ]; then
+	if ! echo $@ | grep "$FIXED_CONTESTANT" > /dev/null; then
 		((NBR_OF_PLAYERS++))
 	fi
 fi
