@@ -168,6 +168,7 @@ run_test()
 	local diff_file leak_file
 	local status vm1_status vm2_status
 	local nbr_of_fights=$#
+	local nbr_of_win_fixed_contestant=0
 
 	local old_IFS=$IFS
 	local new_IFS=$'\n'
@@ -250,6 +251,11 @@ run_test()
 					((count_success++))
 					print_ok "Good!"
 					print_winner $vm1_output_tmp
+					if [ ! -z "$FIXED_CONTESTANT" ]; then
+						if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
+							((nbr_of_win_fixed_contestant++))
+						fi
+					fi
 				fi
 				rm $vm1_output_tmp $vm2_output_tmp
 			fi
@@ -261,6 +267,9 @@ run_test()
 	IFS=$old_IFS
 	printf "\n"
 	print_summary $nbr_of_fights
+	if [ ! -z "$FIXED_CONTESTANT" ]; then
+		printf "\n\"%s\" has won ${CYAN}%3d/%d${RESET} fights\n" "$FIXED_CONTESTANT_NAME" $nbr_of_win_fixed_contestant $nbr_of_fights
+	fi
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
@@ -289,6 +298,7 @@ MODE=$MODE_NORMAL
 NBR_OF_FIGHTS=0
 NBR_OF_CONTESTANTS=-1
 FIXED_CONTESTANT=""
+FIXED_CONTESTANT_NAME=""
 
 while getopts "bchav:t:lf:F:m:p:" opt
 do
@@ -343,6 +353,7 @@ do
 				exit
 			fi
 			FIXED_CONTESTANT=$OPTARG
+			FIXED_CONTESTANT_NAME=`strings $FIXED_CONTESTANT | head -n 1`
 			;;
 		h|*)
 			print_usage_and_exit
