@@ -9,20 +9,31 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] exec player..."
-	printf "%s\n" "  - [-b]       convert player .s file to bytecode first"
-	printf "%s\n" "  - [-c]       clean directory at first"
-	printf "%s\n" "  - [-a]       enable aff operator"
-	printf "%s\n" "  - [-v N]     verbose mode (mode should be between 0 and 31)"
-	printf "%s\n" "  - [-t N]     timeout value in seconds (default 10 seconds)"
-	printf "%s\n" "  - [-l]       check for leaks"
-	printf "%s\n" "  - [-h]       print this message and exit"
-	printf "%s\n" "  - [-f N]     run N fights"
-	printf "%s\n" "                  if enabled use the set of players to randomly populate"
-	printf "%s\n" "                  the arena with 2, 3 or 4 players and let them fight."
-	printf "%s\n" "  - exec       path to your executable"
-	printf "%s\n" "  - player     player (.cor file, or .s file with the -b option)"
+	printf "%s\n" "Usage: ./$0 [-bchl] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] exec player..."
+	printf "%s\n" "  - [-b]               convert player .s file to bytecode first"
+	printf "%s\n" "  - [-c]               clean directory at first"
+	printf "%s\n" "  - [-a]               enable aff operator"
+	printf "%s\n" "  - [-v N]             verbose mode (mode should be between 0 and 31)"
+	printf "%s\n" "  - [-t N]             timeout value in seconds (default 10 seconds)"
+	printf "%s\n" "  - [-l]               check for leaks"
+	printf "%s\n" "  - [-h]               print this message and exit"
+	printf "%s\n" "  - [-f N]             run N fights"
+	printf "%s\n" "                          if enabled use the set of players to randomly populate"
+	printf "%s\n" "                          the arena with 2, 3 or 4 players and let them fight,"
+	printf "%s\n" "                          each player is unique in the arena"
+	printf "%s\n" "  - [-F N]             same as -f except that a player can fight against himself"
+	printf "%s\n" "  - [-m <1|2|3|4>]     set the maximum number of contestants (only works in fight mode)"
+	printf "%s\n" "  - exec               path to your executable"
+	printf "%s\n" "  - player             player (.cor file, or .s file with the -b option)"
 	exit
+}
+
+print_winner()
+{
+	local output=$1
+
+	printf "  "
+	tail -n 1 $output | tr -d '\n'
 }
 
 timeout_fct()
@@ -62,13 +73,20 @@ get_contestants()
 	local nbr_of_players=$2
 	shift 2
 	local list_contestants=""
-	local contestant
+	local contestant=""
 	local index=$nbr_of_players
 
 	for i in `seq $nbr_of_contestants`
 	do
 		[ $nbr_of_players -gt 1 ] && index=$((RANDOM % nbr_of_players + 1))
 		contestant="$(eval echo \${$index})"
+		if [ $MODE -ne $MODE_FIGHT_RANDOM ]; then
+			while echo $list_contestants | grep $contestant > /dev/null;
+			do
+				index=$((RANDOM % nbr_of_players + 1))
+				contestant="$(eval echo \${$index})"
+			done
+		fi
 		list_contestants+="$contestant "
 	done
 	printf "$list_contestants"
@@ -80,10 +98,13 @@ create_list_fights()
 	local nbr_of_players=$#
 	local set_players=""
 	local contestants=""
+	local nbr_of_contestants=$NBR_OF_CONTESTANTS
 
 	for i in `seq $NBR_OF_FIGHTS`
 	do
-		local nbr_of_contestants=$((RANDOM % 3 + 2))
+		if [ $nbr_of_contestants -eq 0 ]; then
+			nbr_of_contestants=$((RANDOM % 3 + 2))
+		fi
 		contestants="`get_contestants $nbr_of_contestants $nbr_of_players $players`"
 		set_players+="$contestants;`get_basename $contestants`\n"
 	done
@@ -217,6 +238,7 @@ run_test()
 				else
 					((count_success++))
 					print_ok "Good!"
+					print_winner $vm1_output_tmp
 				fi
 				rm $vm1_output_tmp $vm2_output_tmp
 			fi
@@ -247,13 +269,17 @@ OPT_A=""
 OPT_V=""
 OPT_V_LIMIT_MIN=0
 OPT_V_LIMIT_MAX=31
-NBR_OF_FIGHTS=0
 
 MODE_NORMAL=0
 MODE_FIGHT=1
+MODE_FIGHT_RANDOM=2
 MODE=$MODE_NORMAL
 
-while getopts "bchav:t:lf:" opt
+NBR_OF_FIGHTS=0
+NBR_OF_CONTESTANTS=0
+FIXED_CONTESTANT=""
+
+while getopts "bchav:t:lf:F:m:" opt
 do
 	case "$opt" in
 		b)
@@ -284,13 +310,20 @@ do
 				print_usage_and_exit
 			fi
 			;;
-		f)
+		f|F)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
 				printf "Fight mode enabled.\n"
-				MODE=$MODE_FIGHT
+				[ "$opt" = "r" ] && MODE=$MODE_FIGHT_RANDOM || MODE=$MODE_FIGHT
 				NBR_OF_FIGHTS=$OPTARG
 			else
 				printf "Invalid number or fight, fight mode disabled...\n"
+			fi
+			;;
+		m)
+			if echo $OPTARG | grep -E "^[1-4]$" > /dev/null 2>&1; then
+				NBR_OF_CONTESTANTS=$OPTARG
+			else
+				print_usage_and_exit
 			fi
 			;;
 		h|*)
@@ -299,10 +332,20 @@ do
 	esac
 done
 shift $((OPTIND - 1))
-if [ $# -lt 2 ];then
+
+if [ $NBR_OF_CONTESTANTS -ne 0 -a $MODE -eq $MODE_NORMAL ]; then
 	print_usage_and_exit
+fi
+
+if [ $# -lt 2 ]; then
+	print_usage_and_exit
+fi
+
+if [ $NBR_OF_CONTESTANTS -gt $(($# - 1)) ]; then
+	printf "The provided set of %s players is to small to generate fights with %s contestants.\n" $(($# - 1)) $NBR_OF_CONTESTANTS
 	exit
 fi
+
 [ $CLEAN_FIRST -ne 0 ] && clean_dir $DIRS
 check_executable $1
 initialize_dir $DIRS
