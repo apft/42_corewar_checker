@@ -9,7 +9,7 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-bchld] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
+	printf "%s\n" "Usage: $0 [-bchld] [-v N] [-t N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
 	printf "%s\n" "  - [-b]               convert player .s file to bytecode first"
 	printf "%s\n" "  - [-c]               clean directory at first"
 	printf "%s\n" "  - [-a]               enable aff operator"
