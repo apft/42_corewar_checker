@@ -165,6 +165,7 @@ run_test()
 	local list_asm full_paths only_names
 	local diff_file leak_file
 	local status vm1_status vm2_status
+	local nbr_of_fights=$#
 
 	local old_IFS=$IFS
 	local new_IFS=$'\n'
@@ -175,6 +176,7 @@ run_test()
 		IFS=$new_IFS
 		only_names="`echo "$list_fights" | cut -d ';' -f 2`"
 		first_column_width=`compute_column_width $only_names`
+		nbr_of_fights=`echo "$list_fights" | wc -l | bc`
 	else
 		first_column_width=`compute_column_width $list_fights`
 	fi
@@ -257,7 +259,7 @@ run_test()
 	done
 	IFS=$old_IFS
 	printf "\n"
-	print_summary $nbr_of_players
+	print_summary $nbr_of_fights
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
