@@ -363,8 +363,10 @@ do
 done
 shift $((OPTIND - 1))
 
-if [ $NBR_OF_CONTESTANTS -ne 0 -a $MODE -eq $MODE_NORMAL ]; then
-	print_usage_and_exit
+if [ $MODE -eq $MODE_NORMAL ]; then
+	if [ $NBR_OF_CONTESTANTS -ne -1 -o ! -z $FIXED_CONTESTANT ]; then
+		print_usage_and_exit
+	fi
 fi
 
 if [ $# -lt 2 ]; then
