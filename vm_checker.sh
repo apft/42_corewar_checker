@@ -13,13 +13,13 @@ print_usage_and_exit()
 	printf "%s\n" "    -a                 enable aff operator"
 	printf "%s\n" "    -b                 convert all player file with an extension different to .cor into bytecode first"
 	printf "%s\n" "    -c                 clean directory at first"
-	printf "%s\n" "    -d                 enable diff mode (incompatible with -f)"
+	printf "%s\n" "    -d                 enable diff mode"
 	printf "%s\n" "                         compare exec output with corewar exec provided by 42 (zaz's corewar)"
 	printf "%s\n" "    -h                 print this message and exit"
 	printf "%s\n" "    -l                 check for leaks"
 	printf "%s\n" "    -t N               timeout value in seconds (default 10 seconds)"
 	printf "%s\n" "    -v N               verbose mode (mode should be between 0 and 31)"
-	printf "%s\n" "    -f N               enable fight mode, run N fights (incompatible with -d)"
+	printf "%s\n" "    -f N               enable fight mode, run N fights"
 	printf "%s\n" "                          if enabled use the set of players to randomly populate"
 	printf "%s\n" "                          the arena with 2, 3 or 4 players and let them fight,"
 	printf "%s\n" "                          each player is unique in the arena"
@@ -90,7 +90,7 @@ get_contestants()
 			[ $nbr_of_players -gt 1 ] && index=$((RANDOM % nbr_of_players + 1))
 			contestant="$(eval echo \${$index})"
 		fi
-		if [ $MODE -ne $MODE_FIGHT_RANDOM ]; then
+		if [ $FIGHT_RANDOM -eq 0 ]; then
 			while echo $list_contestants | grep $contestant > /dev/null;
 			do
 				index=$((RANDOM % nbr_of_players + 1))
@@ -126,7 +126,7 @@ create_list_fights()
 
 get_list_fights()
 {
-	if [ $MODE -eq $MODE_FIGHT ]; then
+	if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
 		create_list_fights $@
 	else
 		echo "$@"
@@ -195,7 +195,7 @@ run_test()
 
 	local list_fights=`get_list_fights $players`
 	local first_column_width
-	if [ $MODE -eq $MODE_FIGHT ]; then
+	if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
 		IFS=$new_IFS
 		only_names="`echo "$list_fights" | cut -d ';' -f 2`"
 		first_column_width=`compute_column_width $only_names`
@@ -209,18 +209,15 @@ run_test()
 	do
 		IFS=$old_IFS
 		((i++))
-		case $MODE in
-			$MODE_FIGHT | $MODE_FIGHT_RANDOM)
-				full_paths=`echo $fight | cut -d ';' -f 1`
-				only_names=`echo $fight | cut -d ';' -f 2`
-				printf "%3d: %-*s  " $i $first_column_width "$only_names"
-				;;
-			*)
-				full_paths=$fight
-				only_names=`basename $fight`
-				printf "%-*s  " $first_column_width "$fight"
-				;;
-		esac
+		if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+			full_paths=`echo $fight | cut -d ';' -f 1`
+			only_names=`echo $fight | cut -d ';' -f 2`
+			printf "%3d: %-*s  " $i $first_column_width "$only_names"
+		else
+			full_paths=$fight
+			only_names=`basename $fight`
+			printf "%-*s  " $first_column_width "$fight"
+		fi
 		check_valid_file $list_contestants
 		if [ $? -ne 0 ]; then
 			((count_failure++))
@@ -243,7 +240,7 @@ run_test()
 				list_asm="$full_paths"
 			fi
 			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
-			if [ $MODE -eq $MODE_DIFF ]; then
+			if [ $DIFF -eq 1 ]; then
 				timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 				vm1_status=$?
 				print_status $vm1_status
@@ -254,7 +251,7 @@ run_test()
 			print_status $vm2_status
 			local vm_timeout=0
 			local vm_leaks=0
-			if [ $MODE -eq $MODE_DIFF ]; then
+			if [ $DIFF -eq 1 ]; then
 				if [ $vm1_status -eq 0 -a $vm2_status -eq 0 ]; then
 					diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
 					if [ -s $diff_tmp ]; then
@@ -266,7 +263,6 @@ run_test()
 					else
 						((count_success++))
 						print_ok "Good!"
-						print_winner $vm1_output_tmp
 						if [ ! -z "$FIXED_CONTESTANT" ]; then
 							if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
 								((nbr_of_win_fixed_contestant++))
@@ -274,14 +270,15 @@ run_test()
 						fi
 					fi
 				fi
-				[ $vm1_status -eq 0 ] && printf "ok      "
 				[ $vm1_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
 				rm $vm1_output_tmp
 			fi
-			[ $vm2_status -eq 0 ] && printf "ok"
 			[ $vm2_status -eq $STATUS_SEGV ] && print_error "segfault" && ((count_failure++))
 			[ $vm2_status -eq $STATUS_TIMEOUT ] && print_error "timeout" && vm_timeout=1
 			[ $CHECK_LEAKS -ne 0 -a $vm2_status -eq $STATUS_LEAKS ] && print_error "leaks" && vm_leaks=1
+			if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+				print_winner $vm2_output_tmp
+			fi
 			printf "\n"
 			[ $vm_timeout -eq 1 ] && ((count_timeout++))
 			[ $vm_leaks -eq 1 ] && ((count_leaks++))
@@ -299,7 +296,7 @@ run_test()
 	   cat $convert_to_bytecode_list | xargs rm 2> /dev/null
 	   rm $convert_to_bytecode_list
    fi
-	[ -f $diff_tmp ] && rm $diff_tmp
+   [ -f $diff_tmp ] && rm $diff_tmp
 }
 
 ASM_DIR=".asm"
@@ -320,11 +317,9 @@ OPT_V=""
 OPT_V_LIMIT_MIN=0
 OPT_V_LIMIT_MAX=31
 
-MODE_NORMAL=0
-MODE_DIFF=1
-MODE_FIGHT=2
-MODE_FIGHT_RANDOM=3
-MODE=$MODE_NORMAL
+DIFF=0
+FIGHT=0
+FIGHT_RANDOM=0
 
 NBR_OF_FIGHTS=0
 NBR_OF_CONTESTANTS=-1
@@ -352,13 +347,7 @@ do
 			CHECK_LEAKS=1
 			;;
 		d)
-			case $MODE in
-				$MODE_FIGHT | $MODE_FIGHT_RANDOM)
-					printf "%s\n\n" "Error: fight mode already enabled"
-					print_usage_and_exit
-					;;
-			esac
-			MODE=$MODE_DIFF
+			DIFF=1
 			;;
 		v)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
@@ -374,15 +363,9 @@ do
 			fi
 			;;
 		f|F)
-			case $MODE in
-				$MODE_DIFF)
-					printf "%s\n\n" "Error: diff mode already enabled"
-					print_usage_and_exit
-					;;
-			esac
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
 				printf "Fight mode enabled.\n"
-				[ "$opt" = "r" ] && MODE=$MODE_FIGHT_RANDOM || MODE=$MODE_FIGHT
+				[ "$opt" = "f" ] && FIGHT=1 || FIGHT_RANDOM=1
 				NBR_OF_FIGHTS=$OPTARG
 			else
 				printf "Invalid number or fight, fight mode disabled...\n"
@@ -419,9 +402,14 @@ do
 done
 shift $((OPTIND - 1))
 
-if [ $MODE -eq $MODE_NORMAL ]; then
+if [ $FIGHT -eq 1 -a $FIGHT_RANDOM -eq 1 ]; then
+	printf "%s\n\n" "Error: choose a fight mode"
+	print_usage_and_exit
+fi
+
+if [ $FIGHT -eq 0 -a $FIGHT_RANDOM -eq 0 ]; then
 	if [ $NBR_OF_CONTESTANTS -ne -1 -o ! -z "$FIXED_CONTESTANT" ]; then
-		printf "%s\n\n" "Error: fight mode not enabled..."
+		printf "%s\n\n" "Error: fight mode not enabled"
 		print_usage_and_exit
 	fi
 fi
