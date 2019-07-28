@@ -1,5 +1,12 @@
 #!/bin/sh
 
+if [ $# -ne 1 ]; then
+	printf "Usage: $0 folder\n"
+	exit
+fi
+
+FOLDER=$1
+
 DATA="list.txt"
 SEPARATOR=";"
 
@@ -42,7 +49,7 @@ create_filename()
 	local op=`extract_field 2 $line`
 	local comment=`extract_field 3 $line | tr ' ' '_'`
 
-	echo "${op_num}_${op}-${comment}.s"
+	echo "$FOLDER/${op_num}_${op}-${comment}.s"
 }
 
 while read line
