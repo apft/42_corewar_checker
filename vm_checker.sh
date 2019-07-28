@@ -141,12 +141,12 @@ create_list_asm()
 
 	for item in $items
 	do
-		item_suffix=`echo "$file" | rev | cut -c -4 | rev`
-		if [ ${item_suffix:0:4} != ".cor" ]; then
-			local main_part=`echo $item | rev | cut -d '.' -f 2- | rev`
-			list_asm+="${main_part:-$item}.cor"
-		else
+		item_suffix=`echo "$item" | rev | cut -c -4 | rev`
+		if [ ${item_suffix:0:4} = ".cor" ]; then
 			list_asm+="$item "
+		else
+			local main_part=`echo $item | rev | cut -d '.' -f 2- | rev`
+			list_asm+="${main_part:-$item}.cor "
 		fi
 	done
 	printf "$list_asm"
@@ -235,10 +235,8 @@ run_test()
 					continue
 				fi
 				[ -f $asm_error_file ] && rm $asm_error_file
-				list_asm="`create_list_asm $full_paths`"
-			else
-				list_asm="$full_paths"
 			fi
+			list_asm="`create_list_asm $full_paths`"
 			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
 			if [ $DIFF -eq 1 ]; then
 				timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
@@ -293,7 +291,7 @@ run_test()
 		printf "\n\"%s\" has won ${CYAN}%3d/%d${RESET} fights\n" "$FIXED_CONTESTANT_NAME" $nbr_of_win_fixed_contestant $nbr_of_fights
 	fi
 	if [ $RUN_ASM -eq 1 -a -f $convert_to_bytecode_list ]; then
-	   cat $convert_to_bytecode_list | xargs rm 2> /dev/null
+	   uniq $convert_to_bytecode_list | xargs rm 2> /dev/null
 	   rm $convert_to_bytecode_list
    fi
    [ -f $diff_tmp ] && rm $diff_tmp
