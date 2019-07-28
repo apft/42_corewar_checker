@@ -105,7 +105,7 @@ run_checks()
 
 ASM_42="resources/42_asm"
 ASM_USR=""
-CHAMPIONS_FOLDER="test_champs"
+CHAMPIONS_FOLDER="champs"
 CHAMPIONS_DEV="/dev/null /dev/random /dev/urandom"
 CHAMPIONS="`find ${CHAMPIONS_FOLDER} -type f -name \"*.s\"`"
 CHAMPIONS+=" $CHAMPIONS_DEV"
