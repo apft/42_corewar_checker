@@ -9,9 +9,9 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] exec player..."
+	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] [-B asm] exec player..."
 	printf "%s\n" "    -a                 enable aff operator"
-	printf "%s\n" "    -b                 convert player .s file to bytecode first"
+	printf "%s\n" "    -b                 convert all player file with an extension different to .cor into bytecode first"
 	printf "%s\n" "    -c                 clean directory at first"
 	printf "%s\n" "    -d                 enable diff mode (incompatible with -f)"
 	printf "%s\n" "                         compare exec output with corewar exec provided by 42 (zaz's corewar)"
@@ -26,6 +26,8 @@ print_usage_and_exit()
 	printf "%s\n" "    -F N               same as -f except that a player can fight against himself"
 	printf "%s\n" "    -m <1|2|3|4>       set the number of contestants (works only in fight mode)"
 	printf "%s\n" "    -p <player>        define a fixed contestant that will appear in all fights (works only in fight mode)"
+	printf "%s\n" "    -B <asm>           path to the asm executable to use to convert into bytecode with -b option (default to asm provided by 42)"
+	printf "%s\n" "                          assume that the .cor file is created with the same pathname than the input file"
 	printf "%s\n" "    exec               path to your corewar executable"
 	printf "%s\n" "    player...          list of players (.cor file, or .s file with the -b option)"
 	exit
@@ -135,23 +137,38 @@ create_list_asm()
 {
 	local items=$@
 	local list_asm=""
+	local item_suffix=""
 
 	for item in $items
 	do
-		list_asm+="`echo $item | rev | cut -d '.' -f 2- | rev`"
-		list_asm+=".cor "
+		item_suffix=`echo "$file" | rev | cut -c -4 | rev`
+		if [ ${item_suffix:0:4} != ".cor" ]; then
+			local main_part=`echo $item | rev | cut -d '.' -f 2- | rev`
+			list_asm+="${main_part:-$item}.cor"
+		else
+			list_asm+="$item "
+		fi
 	done
 	printf "$list_asm"
 }
 
 run_asm()
 {
+	local tmp_list=$1
+	local log_file=$2
+	shift 2
 	local files=$@
+	local file_suffix=""
 
 	for file in $files
 	do
-		$ASM $file > /dev/null 2>&1
-		[ $? -ne 0 ] && return $STATUS_ASM_FAILED
+		file_suffix=`echo "$file" | rev | cut -c -4 | rev`
+		if [ ${file_suffix:0:4} != ".cor" ]; then
+			$ASM $file > /dev/null 2> $log_file
+			[ $? -ne 0 ] && return $STATUS_ASM_FAILED
+			local bytecode_file="`echo $file | rev | cut -d '.' -f 2- | rev`"
+			echo "${bytecode_file:-$file}.cor" >> $tmp_list
+		fi
 	done
 	return $STATUS_SUCCESS
 }
@@ -171,6 +188,7 @@ run_test()
 	local status vm1_status vm2_status
 	local nbr_of_fights=$#
 	local nbr_of_win_fixed_contestant=0
+	local convert_to_bytecode_list="$ASM_DIR/list.txt"
 
 	local old_IFS=$IFS
 	local new_IFS=$'\n'
@@ -208,21 +226,23 @@ run_test()
 			((count_failure++))
 		else
 			tmp_file=`echo $only_names | sed -E 's/( )+/_-_/g'`
-			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
 			if [ $RUN_ASM -eq 1 ]; then
-				run_asm $full_paths
+				local asm_error_file=".asm_error.tmp"
+				run_asm $convert_to_bytecode_list $asm_error_file $full_paths
 				status=$?
 				if [ $status -ne $STATUS_SUCCESS ]; then
 					print_status $status
-					print_status $status
-					printf "Could not convert to ASM\n"
+					printf "Could not convert to bytecode"
+					printf "  %s\n" "`cat $asm_error_file`"
 					((count_failure++))
 					continue
 				fi
+				[ -f $asm_error_file ] && rm $asm_error_file
 				list_asm="`create_list_asm $full_paths`"
 			else
 				list_asm="$full_paths"
 			fi
+			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
 			if [ $MODE -eq $MODE_DIFF ]; then
 				timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 				vm1_status=$?
@@ -266,7 +286,6 @@ run_test()
 			[ $vm_timeout -eq 1 ] && ((count_timeout++))
 			[ $vm_leaks -eq 1 ] && ((count_leaks++))
 			rm $vm2_output_tmp
-			[ $RUN_ASM -eq 1 ] && rm $list_asm
 		fi
 		IFS=$new_IFS
 	done
@@ -276,15 +295,20 @@ run_test()
 	if [ ! -z "$FIXED_CONTESTANT" ]; then
 		printf "\n\"%s\" has won ${CYAN}%3d/%d${RESET} fights\n" "$FIXED_CONTESTANT_NAME" $nbr_of_win_fixed_contestant $nbr_of_fights
 	fi
+	if [ $RUN_ASM -eq 1 -a -f $convert_to_bytecode_list ]; then
+	   cat $convert_to_bytecode_list | xargs rm 2> /dev/null
+	   rm $convert_to_bytecode_list
+   fi
 	[ -f $diff_tmp ] && rm $diff_tmp
 }
 
+ASM_DIR=".asm"
 DIFF_DIR=".diff"
 LEAKS_DIR=".leaks"
-DIRS="$DIFF_DIR $LEAKS_DIR"
+DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
 
 VM_42="./resources/42_corewar"
-ASM="resources/42_asm"
+ASM="./resources/42_asm"
 
 RUN_ASM=0
 CLEAN_FIRST=0
@@ -307,7 +331,7 @@ NBR_OF_CONTESTANTS=-1
 FIXED_CONTESTANT=""
 FIXED_CONTESTANT_NAME=""
 
-while getopts "bchadv:t:lf:F:m:p:" opt
+while getopts "bchadv:t:lf:F:m:p:B:" opt
 do
 	case "$opt" in
 		b)
@@ -379,6 +403,14 @@ do
 			fi
 			FIXED_CONTESTANT=$OPTARG
 			FIXED_CONTESTANT_NAME=`strings $FIXED_CONTESTANT | head -n 1`
+			;;
+		B)
+			if [ ! -x $OPTARG ]; then
+				printf "The provided asm is not executable, use default asm.\n"
+			else
+				ASM=$OPTARG
+				[ $(dirname $ASM) = '.' -a ${ASM:0:2} != "./" ] && ASM="./$ASM"
+			fi
 			;;
 		h|*)
 			print_usage_and_exit
