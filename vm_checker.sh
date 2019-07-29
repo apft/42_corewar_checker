@@ -275,7 +275,7 @@ run_test()
 			[ $vm2_status -eq $STATUS_TIMEOUT ] && print_error "timeout" && vm_timeout=1
 			[ $CHECK_LEAKS -ne 0 -a $vm2_status -eq $STATUS_LEAKS ] && print_error "leaks" && vm_leaks=1
 			if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-				print_winner $vm2_output_tmp
+				[ $vm2_status -eq 0 ] && print_winner $vm2_output_tmp
 			fi
 			printf "\n"
 			[ $vm_timeout -eq 1 ] && ((count_timeout++))
