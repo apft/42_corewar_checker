@@ -164,10 +164,11 @@ run_asm()
 	do
 		file_suffix=`echo "$file" | rev | cut -c -4 | rev`
 		if [ ${file_suffix:0:4} != ".cor" ]; then
-			$ASM $file > /dev/null 2> $log_file
+			$ASM $file > $log_file 2>&1
 			[ $? -ne 0 ] && return $STATUS_ASM_FAILED
 			local bytecode_file="`echo $file | rev | cut -d '.' -f 2- | rev`"
 			echo "${bytecode_file:-$file}.cor" >> $tmp_list
+			rm $log_file
 		fi
 	done
 	return $STATUS_SUCCESS
@@ -184,7 +185,7 @@ run_test()
 	local vm2_output_tmp="/tmp/corewar_checker_vm2_output.tmp"
 	local diff_tmp="diff_output.tmp"
 	local list_asm full_paths only_names
-	local diff_file leak_file
+	local asm_file diff_file leak_file
 	local status vm1_status vm2_status
 	local nbr_of_fights=$#
 	local nbr_of_win_fixed_contestant=0
@@ -224,17 +225,16 @@ run_test()
 		else
 			tmp_file=`echo $only_names | sed -E 's/( )+/_-_/g'`
 			if [ $RUN_ASM -eq 1 ]; then
-				local asm_error_file=".asm_error.tmp"
-				run_asm $convert_to_bytecode_list $asm_error_file $full_paths
+				asm_file=$ASM_DIR/`create_filename $tmp_file "asm"`
+				run_asm $convert_to_bytecode_list $asm_file $full_paths
 				status=$?
 				if [ $status -ne $STATUS_SUCCESS ]; then
 					print_status $status
 					printf "Could not convert to bytecode"
-					printf "  %s\n" "`cat $asm_error_file`"
+					printf "  %s\n" "`cat $asm_file`"
 					((count_failure++))
 					continue
 				fi
-				[ -f $asm_error_file ] && rm $asm_error_file
 			fi
 			list_asm="`create_list_asm $full_paths`"
 			leak_file=$LEAKS_DIR/`create_filename $tmp_file "leak"`
