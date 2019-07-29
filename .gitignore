@@ -1,6 +1,5 @@
 # swap files
 *.sw*
-*.tmp
 
 # bin
 *.out
@@ -14,3 +13,12 @@
 
 # tag files
 tags
+
+# script output
+*.tmp
+.asm/
+.diff/
+.leaks/
+
+# debug
+*.dSYM
