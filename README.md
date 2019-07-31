@@ -2,8 +2,8 @@
 
 This is a set of scripts to check both programs of the [42]'s project Corewar.
 
-* [*asm_checker.sh*](#asm_checker)
-* [*vm_checker.sh*](#vm_checker)
+* [*asm_checker.sh*](#asm-checker)
+* [*vm_checker.sh*](#vm-checker)
 
 
 #### TL;DR
