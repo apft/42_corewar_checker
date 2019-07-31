@@ -105,12 +105,8 @@ get_basename()
 {
 	local output=""
 
-	for file in $@
-	do
-		output+=`basename $file | tr -d '\n'`
-		output+="  "
-	done
-	printf "$output" | sed 's/ +$//'
+	basename -a $@ | tr '\n' ' '
+	printf "\n"
 }
 
 compute_column_width()

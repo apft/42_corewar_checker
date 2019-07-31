@@ -1,15 +1,44 @@
 #!/bin/bash
 
-if [ -f commons.sh ]; then
-	. commons.sh
+SCRIPT_PATH=`dirname $0`
+
+ASM_DIR=".asm"
+DIFF_DIR=".diff"
+LEAKS_DIR=".leaks"
+DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
+
+VM_42="$SCRIPT_PATH/resources/42_corewar"
+ASM="$SCRIPT_PATH/resources/42_asm"
+
+RUN_ASM=0
+CLEAN_FIRST=0
+CHECK_LEAKS=0
+KILL_TIMEOUT=1
+TIMEOUT_VALUE=10 #second
+OPT_A=""
+OPT_V=""
+OPT_V_LIMIT_MIN=0
+OPT_V_LIMIT_MAX=31
+
+DIFF=0
+FIGHT=0
+FIGHT_RANDOM=0
+
+NBR_OF_FIGHTS=0
+NBR_OF_CONTESTANTS=-1
+FIXED_CONTESTANT=""
+FIXED_CONTESTANT_NAME=""
+
+if [ -f "$SCRIPT_PATH/commons.sh" ]; then
+	. "$SCRIPT_PATH/commons.sh"
 else
-	printf "%s\n" "The commons.sh file is missing"
+	printf "%s\n" "The $SCRIPT_PATH/commons.sh file is missing"
 	exit 1
 fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] [-B asm] exec player..."
+	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] [-B asm] <corewar> <player>..."
 	printf "%s\n" "    -a                 enable aff operator"
 	printf "%s\n" "    -b                 convert all player file with an extension different to .cor into bytecode first"
 	printf "%s\n" "    -c                 clean directory at first"
@@ -28,12 +57,12 @@ print_usage_and_exit()
 	printf "%s\n" "    -p <player>        define a fixed contestant that will appear in all fights (works only in fight mode)"
 	printf "%s\n" "    -B <asm>           path to the asm executable to use to convert into bytecode with -b option (default to asm provided by 42)"
 	printf "%s\n" "                          assume that the .cor file is created with the same pathname than the input file"
-	printf "%s\n" "    exec               path to your corewar executable"
-	printf "%s\n" "    player...          list of players (.cor file, or .s file with the -b option)"
-	exit
+	printf "%s\n" "    <corewar>          path to your corewar executable"
+	printf "%s\n" "    <player>...        list of players (.cor file, or .s file with the -b option)"
+	exit 1
 }
 
-print_winner()
+print_last_line_output()
 {
 	local output=$1
 
@@ -69,7 +98,8 @@ timeout_fct()
 	fi
 	# remove last 4 lines of file (added by the time command)
 	sed -i '' -e :a -e '$d;N;2,4ba' -e 'P;D' $tmp_out
-	return $STATUS_SUCCESS
+	wait $pid
+	return $?
 }
 
 get_contestants()
@@ -109,12 +139,18 @@ create_list_fights()
 	local nbr_of_players=$#
 	local set_players=""
 	local contestants=""
-	local nbr_of_contestants=0
+	local nbr_of_contestants=9999
 
 	for i in `seq $NBR_OF_FIGHTS`
 	do
-		if [ $NBR_OF_CONTESTANTS -eq -1 ]; then
+		if [ $nbr_of_players -eq 1 ]; then
+			nbr_of_contestants=1
+		elif [ $NBR_OF_CONTESTANTS -eq -1 ]; then
 			nbr_of_contestants=$((RANDOM % 3 + 2))
+			while [ $nbr_of_contestants -gt $nbr_of_players ]
+			do
+				nbr_of_contestants=$((RANDOM % 3 + 2))
+			done
 		else
 			nbr_of_contestants=$NBR_OF_CONTESTANTS
 		fi
@@ -190,6 +226,7 @@ run_test()
 	local nbr_of_fights=$#
 	local nbr_of_win_fixed_contestant=0
 	local convert_to_bytecode_list="$ASM_DIR/list.txt"
+	local vm_success vm_failure vm_timeout vm_leaks
 
 	local old_IFS=$IFS
 	local new_IFS=$'\n'
@@ -247,19 +284,21 @@ run_test()
 			get_status $? $vm2_output_tmp $leak_file
 			vm2_status=$?
 			print_status $vm2_status
-			local vm_timeout=0
-			local vm_leaks=0
+			vm_success=0
+			vm_failure=0
+			vm_timeout=0
+			vm_leaks=0
 			if [ $DIFF -eq 1 ]; then
 				if [ $vm1_status -eq 0 -a $vm2_status -eq 0 ]; then
 					diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
 					if [ -s $diff_tmp ]; then
-						((count_failure++))
+						vm_failure=1
 						diff_file=$DIFF_DIR/`create_filename $tmp_file "diff"`
 						diff -y $vm1_output_tmp $vm2_output_tmp > $diff_file
 						print_error "Booo!"
 						printf " see $diff_file"
 					else
-						((count_success++))
+						vm_success=1
 						print_ok "Good!"
 						if [ ! -z "$FIXED_CONTESTANT" ]; then
 							if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
@@ -271,13 +310,30 @@ run_test()
 				[ $vm1_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
 				rm $vm1_output_tmp
 			fi
-			[ $vm2_status -eq $STATUS_SEGV ] && print_error "segfault" && ((count_failure++))
-			[ $vm2_status -eq $STATUS_TIMEOUT ] && print_error "timeout" && vm_timeout=1
-			[ $CHECK_LEAKS -ne 0 -a $vm2_status -eq $STATUS_LEAKS ] && print_error "leaks" && vm_leaks=1
-			if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-				[ $vm2_status -eq 0 ] && print_winner $vm2_output_tmp
+			if [ $vm2_status -ne 0 ]; then
+				if [ $vm2_status -eq $STATUS_SEGV ]; then
+					print_error "segfault"
+					vm_failure=1
+				elif [ $vm2_status -eq $STATUS_TIMEOUT ]; then
+					print_error "timeout"
+					vm_timeout=1
+				elif [ $vm2_status -eq $STATUS_LEAKS -a $CHECK_LEAKS -ne 0 ]; then
+					print_error "leaks"
+					vm_leaks=1
+					vm_failure=1
+				elif [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+					print_last_line_output $vm2_output_tmp
+					vm_failure=1
+				fi
+			else
+				[ $DIFF -eq 0 ] && vm_success=1
+				if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+					[ $vm2_status -eq 0 ] && print_last_line_output $vm2_output_tmp
+				fi
 			fi
 			printf "\n"
+			[ $vm_success -eq 1 ] && ((count_success++))
+			[ $vm_failure -eq 1 ] && ((count_failure++))
 			[ $vm_timeout -eq 1 ] && ((count_timeout++))
 			[ $vm_leaks -eq 1 ] && ((count_leaks++))
 			rm $vm2_output_tmp
@@ -296,33 +352,6 @@ run_test()
    fi
    [ -f $diff_tmp ] && rm $diff_tmp
 }
-
-ASM_DIR=".asm"
-DIFF_DIR=".diff"
-LEAKS_DIR=".leaks"
-DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
-
-VM_42="./resources/42_corewar"
-ASM="./resources/42_asm"
-
-RUN_ASM=0
-CLEAN_FIRST=0
-CHECK_LEAKS=0
-KILL_TIMEOUT=1
-TIMEOUT_VALUE=10 #second
-OPT_A=""
-OPT_V=""
-OPT_V_LIMIT_MIN=0
-OPT_V_LIMIT_MAX=31
-
-DIFF=0
-FIGHT=0
-FIGHT_RANDOM=0
-
-NBR_OF_FIGHTS=0
-NBR_OF_CONTESTANTS=-1
-FIXED_CONTESTANT=""
-FIXED_CONTESTANT_NAME=""
 
 while getopts "bchadv:t:lf:F:m:p:B:" opt
 do
@@ -362,7 +391,6 @@ do
 			;;
 		f|F)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
-				printf "Fight mode enabled.\n"
 				[ "$opt" = "f" ] && FIGHT=1 || FIGHT_RANDOM=1
 				NBR_OF_FIGHTS=$OPTARG
 			else
@@ -380,7 +408,7 @@ do
 		p)
 			if [ ! -f $OPTARG ]; then
 				printf "The provided player (-p) is not a valid file: %s\n" $OPTARG
-				exit
+				exit 1
 			fi
 			FIXED_CONTESTANT=$OPTARG
 			FIXED_CONTESTANT_NAME=`strings $FIXED_CONTESTANT | head -n 1`
@@ -417,6 +445,10 @@ if [ $# -lt 2 ]; then
 fi
 
 NBR_OF_PLAYERS=$(($# - 1))
+if [ $NBR_OF_PLAYERS -eq 1 -a $FIGHT -eq 1 ]; then
+	printf "%s\n" "Not enough player ($NBR_OF_PLAYERS) to run the fight mode"
+	exit 1
+fi
 if [ ! -z "$FIXED_CONTESTANT" ]; then
 	if ! echo $@ | grep "$FIXED_CONTESTANT" > /dev/null; then
 		((NBR_OF_PLAYERS++))
@@ -424,10 +456,11 @@ if [ ! -z "$FIXED_CONTESTANT" ]; then
 fi
 if [ $NBR_OF_CONTESTANTS -gt $NBR_OF_PLAYERS ]; then
 	printf "The provided set of %s players is to small to generate fights with %s contestants.\n" $(($# - 1)) $NBR_OF_CONTESTANTS
-	exit
+	exit 1
 fi
 
 [ $CLEAN_FIRST -ne 0 ] && clean_dir $DIRS
 check_executable $1
 initialize_dir $DIRS
+[ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ] && printf "Fight mode enabled.\n"
 run_test $@
