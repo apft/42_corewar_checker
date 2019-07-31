@@ -9,12 +9,12 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: ./$0 [-lch] asm [champions...]"
-	printf "%s\n" "  - [-l]            check for leaks"
-	printf "%s\n" "  - [-c]            clean directory at first"
-	printf "%s\n" "  - [-h]            print this message and exit"
-	printf "%s\n" "  - asm             path to your asm executable file"
-	printf "%s\n" "  - [champions...]  path to the champions to test, if empty use a set of predefined champs stored in \`$CHAMPIONS_FOLDER'"
+	printf "%s\n" "Usage:  `basename $0` [-lch] <asm> [<champion>...]"
+	printf "%s\n" "    -l             check for leaks"
+	printf "%s\n" "    -c             clean directory at first"
+	printf "%s\n" "    -h             print this message and exit"
+	printf "%s\n" "    <asm>          path to your asm executable file"
+	printf "%s\n" "    <champion>...  path to the champions to test, if empty use a set of predefined champs stored in \`$CHAMPIONS_FOLDER'"
 	exit
 }
 
