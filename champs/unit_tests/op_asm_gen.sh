@@ -7,6 +7,8 @@ fi
 
 FOLDER=$1
 
+[ ! -d $FOLDER ] && mkdir $FOLDER
+
 DATA="list.txt"
 SEPARATOR=";"
 
