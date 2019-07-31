@@ -2,6 +2,8 @@
 
 SCRIPT_PATH=`dirname $0`
 
+ZAZ_42_COREWAR_STATUS_SUCCESS=43
+
 ASM_DIR=".asm"
 DIFF_DIR=".diff"
 LEAKS_DIR=".leaks"
@@ -278,6 +280,7 @@ run_test()
 			if [ $DIFF -eq 1 ]; then
 				timeout_fct $vm1_exec $vm1_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
 				vm1_status=$?
+				[ $vm1_status -eq $ZAZ_42_COREWAR_STATUS_SUCCESS ] && vm1_status=$STATUS_SUCCESS
 				print_status $vm1_status
 			fi
 			timeout_fct $vm2_exec $vm2_output_tmp $leak_file $OPT_A $OPT_V $list_asm 2> /dev/null
