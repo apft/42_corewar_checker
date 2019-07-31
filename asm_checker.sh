@@ -124,6 +124,9 @@ do
 			CLEAN_FIRST=1
 			;;
 		l)
+			if ! bin_is_installed "valgrind"; then
+				exit
+			fi
 			CHECK_LEAKS=1
 			;;
 		h|*)

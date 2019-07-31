@@ -30,6 +30,15 @@ print_warning()
 	printf "${YELLOW}%s${RESET}" "$1"
 }
 
+bin_is_installed()
+{
+	if ! which $1 > /dev/null 2>&1; then
+		printf "%s\n" "Error: please install $1 to check leaks"
+		return 1
+	fi
+	return 0
+}
+
 check_executable()
 {
 	if [ ! -f $1 ];then
