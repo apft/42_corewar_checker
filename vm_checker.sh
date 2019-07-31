@@ -1,9 +1,11 @@
 #!/bin/bash
 
-if [ -f commons.sh ]; then
-	. commons.sh
+SCRIPT_PATH=`dirname $0`
+
+if [ -f "$SCRIPT_PATH/commons.sh" ]; then
+	. "$SCRIPT_PATH/commons.sh"
 else
-	printf "%s\n" "The commons.sh file is missing"
+	printf "%s\n" "The $SCRIPT_PATH/commons.sh file is missing"
 	exit 1
 fi
 
@@ -302,8 +304,8 @@ DIFF_DIR=".diff"
 LEAKS_DIR=".leaks"
 DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
 
-VM_42="./resources/42_corewar"
-ASM="./resources/42_asm"
+VM_42="$SCRIPT_PATH/resources/42_corewar"
+ASM="$SCRIPT_PATH/resources/42_asm"
 
 RUN_ASM=0
 CLEAN_FIRST=0
