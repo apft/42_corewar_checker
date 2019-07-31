@@ -324,7 +324,7 @@ run_test()
 					print_error "leaks"
 					vm_leaks=1
 					vm_failure=1
-				elif [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+				else
 					print_last_line_output $vm2_output_tmp
 					vm_failure=1
 				fi
