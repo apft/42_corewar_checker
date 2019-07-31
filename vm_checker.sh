@@ -112,12 +112,18 @@ create_list_fights()
 	local nbr_of_players=$#
 	local set_players=""
 	local contestants=""
-	local nbr_of_contestants=0
+	local nbr_of_contestants=9999
 
 	for i in `seq $NBR_OF_FIGHTS`
 	do
-		if [ $NBR_OF_CONTESTANTS -eq -1 ]; then
+		if [ $nbr_of_players -eq 1 ]; then
+			nbr_of_contestants=1
+		elif [ $NBR_OF_CONTESTANTS -eq -1 ]; then
 			nbr_of_contestants=$((RANDOM % 3 + 2))
+			while [ $nbr_of_contestants -gt $nbr_of_players ]
+			do
+				nbr_of_contestants=$((RANDOM % 3 + 2))
+			done
 		else
 			nbr_of_contestants=$NBR_OF_CONTESTANTS
 		fi
@@ -385,7 +391,6 @@ do
 			;;
 		f|F)
 			if echo $OPTARG | grep -E "^[0-9]+$" > /dev/null 2>&1; then
-				printf "Fight mode enabled.\n"
 				[ "$opt" = "f" ] && FIGHT=1 || FIGHT_RANDOM=1
 				NBR_OF_FIGHTS=$OPTARG
 			else
@@ -403,7 +408,7 @@ do
 		p)
 			if [ ! -f $OPTARG ]; then
 				printf "The provided player (-p) is not a valid file: %s\n" $OPTARG
-				exit
+				exit 1
 			fi
 			FIXED_CONTESTANT=$OPTARG
 			FIXED_CONTESTANT_NAME=`strings $FIXED_CONTESTANT | head -n 1`
@@ -440,6 +445,10 @@ if [ $# -lt 2 ]; then
 fi
 
 NBR_OF_PLAYERS=$(($# - 1))
+if [ $NBR_OF_PLAYERS -eq 1 -a $FIGHT -eq 1]; then
+	printf "%s\n" "Not enough player ($NBR_OF_PLAYERS) to run the fight mode"
+	exit 1
+fi
 if [ ! -z "$FIXED_CONTESTANT" ]; then
 	if ! echo $@ | grep "$FIXED_CONTESTANT" > /dev/null; then
 		((NBR_OF_PLAYERS++))
@@ -447,10 +456,11 @@ if [ ! -z "$FIXED_CONTESTANT" ]; then
 fi
 if [ $NBR_OF_CONTESTANTS -gt $NBR_OF_PLAYERS ]; then
 	printf "The provided set of %s players is to small to generate fights with %s contestants.\n" $(($# - 1)) $NBR_OF_CONTESTANTS
-	exit
+	exit 1
 fi
 
 [ $CLEAN_FIRST -ne 0 ] && clean_dir $DIRS
 check_executable $1
 initialize_dir $DIRS
+[ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ] && printf "Fight mode enabled.\n"
 run_test $@
