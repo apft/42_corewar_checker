@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ -f colors.sh ]; then
-	. colors.sh
+if [ -f "$SCRIPT_PATH/colors.sh" ]; then
+	. "$SCRIPT_PATH/colors.sh"
 fi
 
 STATUS_SUCCESS=0
@@ -48,6 +48,17 @@ check_executable()
 	if [ ! -x $1 ];then
 		printf "%s\n" "Executable ($1) not executable"
 		exit
+	fi
+}
+
+add_prefix_if_current_dir()
+{
+	local file=$1
+
+	if [ "`dirname $file`" = "." -a ${file:0:2} != "./" ]; then
+		printf "./$file"
+	else
+		printf "$file"
 	fi
 }
 

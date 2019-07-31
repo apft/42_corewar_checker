@@ -1,7 +1,9 @@
 #!/bin/bash
 
-if [ -f commons.sh ]; then
-	. commons.sh
+SCRIPT_PATH=`dirname $0`
+
+if [ -f "$SCRIPT_PATH/commons.sh" ]; then
+	. "$SCRIPT_PATH/commons.sh"
 else
 	printf "%s\n" "The commons.sh file is missing"
 	exit 1
@@ -62,12 +64,12 @@ run_checks()
 			valgrind_cmd="`cmd_check_leaks $valgrind_log`"
 
 			asm_file="`echo $champ | rev | cut -d '.' -f 2- | rev`.cor"
-			$valgrind_cmd ./$ASM_USR $champ > $output_usr 2>&1
+			$valgrind_cmd $ASM_USR $champ > $output_usr 2>&1
 			get_status $? $valgrind_log
 			status_usr=$?
 			print_status $status_usr
 			[ -f $asm_file ] && mv $asm_file $bytecode_usr
-			./$ASM_42 $champ > $output_42 2>&1
+			$ASM_42 $champ > $output_42 2>&1
 			status_42=$?
 			print_status $status_42
 			[ -f $asm_file ] && mv $asm_file $bytecode_42
@@ -103,9 +105,9 @@ run_checks()
 	rm $output_42 $output_usr $bytecode_42 $bytecode_usr
 }
 
-ASM_42="resources/42_asm"
+ASM_42="`add_prefix_if_current_dir $SCRIPT_PATH/resources/42_asm`"
 ASM_USR=""
-CHAMPIONS_FOLDER="champs"
+CHAMPIONS_FOLDER="$SCRIPT_PATH/champs"
 CHAMPIONS_DEV="/dev/null /dev/random /dev/urandom"
 CHAMPIONS="`find ${CHAMPIONS_FOLDER} -type f -name \"*.s\"`"
 CHAMPIONS+=" $CHAMPIONS_DEV"
@@ -139,7 +141,7 @@ shift $((OPTIND - 1))
 check_executable "$ASM_42"
 [ $# -lt 1 ] && print_usage_and_exit
 check_executable $1
-ASM_USR="$1"
+ASM_USR="`add_prefix_if_current_dir $1`"
 shift
 [ $# -gt 0 ] && CHAMPIONS="$@"
 [ $CLEAN_FIRST -ne 0 ] && clean_dir $DIRS
