@@ -1,6 +1,53 @@
 #!/bin/bash
 
+################################################################################
+# Winner and Error message :
+#
+# * Winner
+# In order to get the winner of a fight, the last line of the output is printed.
+# If your vm does not print the winner on the last line, you can use a regex to
+# catch the line where it is diplayed. Write your regex in REGEX_WINNER
+# 
+# * Error
+# If your vm return a non null value, meaning an error occurred, the script
+# assumes that the error message is on the last line of your output.
+# If this is not the case, define a regex to catch the line with the error
+# message in REGEX_ERROR
+################################################################################
+
+REGEX_WINNER=""
+REGEX_ERROR=""
+
+################################################################################
+
 SCRIPT_PATH=`dirname $0`
+
+ASM_DIR=".asm"
+DIFF_DIR=".diff"
+LEAKS_DIR=".leaks"
+DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
+
+VM_42="$SCRIPT_PATH/resources/42_corewar"
+ASM="$SCRIPT_PATH/resources/42_asm"
+
+RUN_ASM=0
+CLEAN_FIRST=0
+CHECK_LEAKS=0
+KILL_TIMEOUT=1
+TIMEOUT_VALUE=10 #second
+OPT_A=""
+OPT_V=""
+OPT_V_LIMIT_MIN=0
+OPT_V_LIMIT_MAX=31
+
+DIFF=0
+FIGHT=0
+FIGHT_RANDOM=0
+
+NBR_OF_FIGHTS=0
+NBR_OF_CONTESTANTS=-1
+FIXED_CONTESTANT=""
+FIXED_CONTESTANT_NAME=""
 
 if [ -f "$SCRIPT_PATH/commons.sh" ]; then
 	. "$SCRIPT_PATH/commons.sh"
@@ -32,15 +79,31 @@ print_usage_and_exit()
 	printf "%s\n" "                          assume that the .cor file is created with the same pathname than the input file"
 	printf "%s\n" "    <corewar>          path to your corewar executable"
 	printf "%s\n" "    <player>...        list of players (.cor file, or .s file with the -b option)"
-	exit
+	exit 1
 }
 
-print_winner()
+print_vm_error()
 {
 	local output=$1
 
 	printf "    "
-	tail -n 1 $output | tr -d '\n'
+	if [ -z "$REGEX_ERROR" ]; then
+		tail -n 1 $output | tr -d '\n'
+	else
+		grep -E "$REGEX_ERROR" $output | tr -d '\n'
+	fi
+}
+
+print_vm_winner()
+{
+	local output=$1
+
+	printf "    "
+	if [ -z "$REGEX_WINNER" ]; then
+		tail -n 1 $output | tr -d '\n'
+	else
+		grep -E "$REGEX_WINNER" $output | tr -d '\n'
+	fi
 }
 
 timeout_fct()
@@ -295,13 +358,13 @@ run_test()
 					vm_leaks=1
 					vm_failure=1
 				elif [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-					print_winner $vm2_output_tmp
+					print_vm_error $vm2_output_tmp
 					vm_failure=1
 				fi
 			else
 				[ $DIFF -eq 0 ] && vm_success=1
 				if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-					[ $vm2_status -eq 0 ] && print_winner $vm2_output_tmp
+					[ $vm2_status -eq 0 ] && print_vm_winner $vm2_output_tmp
 				fi
 			fi
 			printf "\n"
@@ -325,33 +388,6 @@ run_test()
    fi
    [ -f $diff_tmp ] && rm $diff_tmp
 }
-
-ASM_DIR=".asm"
-DIFF_DIR=".diff"
-LEAKS_DIR=".leaks"
-DIRS="$ASM_DIR $DIFF_DIR $LEAKS_DIR"
-
-VM_42="$SCRIPT_PATH/resources/42_corewar"
-ASM="$SCRIPT_PATH/resources/42_asm"
-
-RUN_ASM=0
-CLEAN_FIRST=0
-CHECK_LEAKS=0
-KILL_TIMEOUT=1
-TIMEOUT_VALUE=10 #second
-OPT_A=""
-OPT_V=""
-OPT_V_LIMIT_MIN=0
-OPT_V_LIMIT_MAX=31
-
-DIFF=0
-FIGHT=0
-FIGHT_RANDOM=0
-
-NBR_OF_FIGHTS=0
-NBR_OF_CONTESTANTS=-1
-FIXED_CONTESTANT=""
-FIXED_CONTESTANT_NAME=""
 
 while getopts "bchadv:t:lf:F:m:p:B:" opt
 do
