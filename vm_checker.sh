@@ -193,6 +193,7 @@ run_test()
 	local nbr_of_fights=$#
 	local nbr_of_win_fixed_contestant=0
 	local convert_to_bytecode_list="$ASM_DIR/list.txt"
+	local vm_success vm_failure vm_timeout vm_leaks
 
 	local old_IFS=$IFS
 	local new_IFS=$'\n'
@@ -250,19 +251,21 @@ run_test()
 			get_status $? $vm2_output_tmp $leak_file
 			vm2_status=$?
 			print_status $vm2_status
-			local vm_timeout=0
-			local vm_leaks=0
+			vm_success=0
+			vm_failure=0
+			vm_timeout=0
+			vm_leaks=0
 			if [ $DIFF -eq 1 ]; then
 				if [ $vm1_status -eq 0 -a $vm2_status -eq 0 ]; then
 					diff $vm1_output_tmp $vm2_output_tmp > $diff_tmp
 					if [ -s $diff_tmp ]; then
-						((count_failure++))
+						vm_failure=1
 						diff_file=$DIFF_DIR/`create_filename $tmp_file "diff"`
 						diff -y $vm1_output_tmp $vm2_output_tmp > $diff_file
 						print_error "Booo!"
 						printf " see $diff_file"
 					else
-						((count_success++))
+						vm_success=1
 						print_ok "Good!"
 						if [ ! -z "$FIXED_CONTESTANT" ]; then
 							if tail -n 1 $vm1_output_tmp | grep "$FIXED_CONTESTANT_NAME" > /dev/null; then
@@ -274,13 +277,30 @@ run_test()
 				[ $vm1_status -eq $STATUS_TIMEOUT ] && print_error "timeout  " && vm_timeout=1
 				rm $vm1_output_tmp
 			fi
-			[ $vm2_status -eq $STATUS_SEGV ] && print_error "segfault" && ((count_failure++))
-			[ $vm2_status -eq $STATUS_TIMEOUT ] && print_error "timeout" && vm_timeout=1
-			[ $CHECK_LEAKS -ne 0 -a $vm2_status -eq $STATUS_LEAKS ] && print_error "leaks" && vm_leaks=1
-			if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-				[ $vm2_status -eq 0 ] && print_winner $vm2_output_tmp
+			if [ $vm2_status -ne 0 ]; then
+				if [ $vm2_status -eq $STATUS_SEGV ]; then
+					print_error "segfault"
+					vm_failure=1
+				elif [ $vm2_status -eq $STATUS_TIMEOUT ]; then
+					print_error "timeout"
+					vm_timeout=1
+				elif [ $vm2_status -eq $STATUS_LEAKS -a $CHECK_LEAKS -ne 0 ]; then
+					print_error "leaks"
+					vm_leaks=1
+					vm_failure=1
+				elif [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+					print_winner $vm2_output_tmp
+					vm_failure=1
+				fi
+			else
+				[ $DIFF -eq 0 ] && vm_success=1
+				if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
+					[ $vm2_status -eq 0 ] && print_winner $vm2_output_tmp
+				fi
 			fi
 			printf "\n"
+			[ $vm_success -eq 1 ] && ((count_success++))
+			[ $vm_failure -eq 1 ] && ((count_failure++))
 			[ $vm_timeout -eq 1 ] && ((count_timeout++))
 			[ $vm_leaks -eq 1 ] && ((count_leaks++))
 			rm $vm2_output_tmp
