@@ -1,7 +1,7 @@
 #!/bin/bash
 
-if [ -f colors.sh ]; then
-	. colors.sh
+if [ -f "$SCRIPT_PATH/colors.sh" ]; then
+	. "$SCRIPT_PATH/colors.sh"
 fi
 
 STATUS_SUCCESS=0
@@ -30,6 +30,15 @@ print_warning()
 	printf "${YELLOW}%s${RESET}" "$1"
 }
 
+bin_is_installed()
+{
+	if ! which $1 > /dev/null 2>&1; then
+		printf "%s\n" "Error: please install $1 to check leaks"
+		return 1
+	fi
+	return 0
+}
+
 check_executable()
 {
 	if [ ! -f $1 ];then
@@ -39,6 +48,17 @@ check_executable()
 	if [ ! -x $1 ];then
 		printf "%s\n" "Executable ($1) not executable"
 		exit
+	fi
+}
+
+add_prefix_if_current_dir()
+{
+	local file=$1
+
+	if [ "`dirname $file`" = "." -a ${file:0:2} != "./" ]; then
+		printf "./$file"
+	else
+		printf "$file"
 	fi
 }
 
