@@ -71,7 +71,8 @@ timeout_fct()
 	fi
 	# remove last 4 lines of file (added by the time command)
 	sed -i '' -e :a -e '$d;N;2,4ba' -e 'P;D' $tmp_out
-	return $STATUS_SUCCESS
+	wait $pid
+	return $?
 }
 
 get_contestants()
