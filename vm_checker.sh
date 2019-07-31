@@ -1,25 +1,5 @@
 #!/bin/bash
 
-################################################################################
-# Winner and Error message :
-#
-# * Winner
-# In order to get the winner of a fight, the last line of the output is printed.
-# If your vm does not print the winner on the last line, you can use a regex to
-# catch the line where it is diplayed. Write your regex in REGEX_WINNER
-# 
-# * Error
-# If your vm return a non null value, meaning an error occurred, the script
-# assumes that the error message is on the last line of your output.
-# If this is not the case, define a regex to catch the line with the error
-# message in REGEX_ERROR
-################################################################################
-
-REGEX_WINNER=""
-REGEX_ERROR=""
-
-################################################################################
-
 SCRIPT_PATH=`dirname $0`
 
 ASM_DIR=".asm"
@@ -82,28 +62,12 @@ print_usage_and_exit()
 	exit 1
 }
 
-print_vm_error()
+print_last_line_output()
 {
 	local output=$1
 
 	printf "    "
-	if [ -z "$REGEX_ERROR" ]; then
-		tail -n 1 $output | tr -d '\n'
-	else
-		grep -E "$REGEX_ERROR" $output | tr -d '\n'
-	fi
-}
-
-print_vm_winner()
-{
-	local output=$1
-
-	printf "    "
-	if [ -z "$REGEX_WINNER" ]; then
-		tail -n 1 $output | tr -d '\n'
-	else
-		grep -E "$REGEX_WINNER" $output | tr -d '\n'
-	fi
+	tail -n 1 $output | tr -d '\n'
 }
 
 timeout_fct()
@@ -358,13 +322,13 @@ run_test()
 					vm_leaks=1
 					vm_failure=1
 				elif [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-					print_vm_error $vm2_output_tmp
+					print_last_line_output $vm2_output_tmp
 					vm_failure=1
 				fi
 			else
 				[ $DIFF -eq 0 ] && vm_success=1
 				if [ $FIGHT -eq 1 -o $FIGHT_RANDOM -eq 1 ]; then
-					[ $vm2_status -eq 0 ] && print_vm_winner $vm2_output_tmp
+					[ $vm2_status -eq 0 ] && print_last_line_output $vm2_output_tmp
 				fi
 			fi
 			printf "\n"
