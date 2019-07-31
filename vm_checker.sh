@@ -9,7 +9,7 @@ fi
 
 print_usage_and_exit()
 {
-	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] [-B asm] exec player..."
+	printf "%s\n" "Usage: $0 [-abcdhl] [-t N] [-v N] [-f N] [-F N] [-m <1|2|3|4>] [-p <player>] [-B asm] <corewar> <player>..."
 	printf "%s\n" "    -a                 enable aff operator"
 	printf "%s\n" "    -b                 convert all player file with an extension different to .cor into bytecode first"
 	printf "%s\n" "    -c                 clean directory at first"
@@ -28,8 +28,8 @@ print_usage_and_exit()
 	printf "%s\n" "    -p <player>        define a fixed contestant that will appear in all fights (works only in fight mode)"
 	printf "%s\n" "    -B <asm>           path to the asm executable to use to convert into bytecode with -b option (default to asm provided by 42)"
 	printf "%s\n" "                          assume that the .cor file is created with the same pathname than the input file"
-	printf "%s\n" "    exec               path to your corewar executable"
-	printf "%s\n" "    player...          list of players (.cor file, or .s file with the -b option)"
+	printf "%s\n" "    <corewar>          path to your corewar executable"
+	printf "%s\n" "    <player>...        list of players (.cor file, or .s file with the -b option)"
 	exit
 }
 
