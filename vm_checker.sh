@@ -445,7 +445,7 @@ if [ $# -lt 2 ]; then
 fi
 
 NBR_OF_PLAYERS=$(($# - 1))
-if [ $NBR_OF_PLAYERS -eq 1 -a $FIGHT -eq 1]; then
+if [ $NBR_OF_PLAYERS -eq 1 -a $FIGHT -eq 1 ]; then
 	printf "%s\n" "Not enough player ($NBR_OF_PLAYERS) to run the fight mode"
 	exit 1
 fi
