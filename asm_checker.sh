@@ -57,7 +57,7 @@ run_checks()
 	do
 		printf "%-*s  " $first_column_width $champ
 		if [ ! -f $champ -a ! -c $champ]; then
-			printf "${YELLOW}%s${RESET}\n" "Player ($player) not found\n"
+			printf "${YELLOW}%s${RESET}\n" "Player ($champ) not found\n"
 			((count_failure++))
 		else
 			valgrind_log="$DIR_LEAKS/`basename $champ`.leaks"
@@ -65,7 +65,7 @@ run_checks()
 
 			asm_file="`echo $champ | rev | cut -d '.' -f 2- | rev`.cor"
 			$valgrind_cmd $ASM_USR $champ > $output_usr 2>&1
-			get_status $? $valgrind_log
+			get_status $? $output_usr $valgrind_log
 			status_usr=$?
 			print_status $status_usr
 			[ -f $asm_file ] && mv $asm_file $bytecode_usr
@@ -84,7 +84,7 @@ run_checks()
 				((count_success++))
 			elif [ $status_usr -eq 0 -a $status_42 -eq 0 ]; then
 				local diff=`diff $bytecode_42 $bytecode_usr 2>&1`
-				if [ "$diff" ];then
+				if [ "$diff" ]; then
 					printf "${RED}%-8s${RESET} %s" "error" "bytecode files differ"
 					((count_failure++))
 				else
