@@ -43,11 +43,11 @@ check_executable()
 {
 	if [ ! -f $1 ];then
 		printf "%s\n" "Executable ($1) not found"
-		exit
+		exit 1
 	fi
 	if [ ! -x $1 ];then
 		printf "%s\n" "Executable ($1) not executable"
-		exit
+		exit 1
 	fi
 }
 
