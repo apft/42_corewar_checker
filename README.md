@@ -14,6 +14,9 @@ $ ./asm_checker.sh ../asm
 
 # Check for potential leaks (requires valgrind)
 $ ./asm_checker.sh -l ../asm
+
+# Run only the tests for the live op
+$ ./asm_checker.sh -l ../asm champs/unit_tests/test_op/01_live*.s
 ```
 
 #### Usage
