@@ -8,9 +8,19 @@
 01;live;dir value is uint max;%4294967295
 01;live;dir value is too big;%94837589436749859842
 01;live;dir value is too small;%-94837589436749859842
+01;live;empty dir value;%
+01;live;ind value;42
+01;live;register value;r1
+01;live;no arg;
+01;live;no arg comma only;,
+01;live;no arg but spaces and comment;      #comment;
+01;live;too many args;%42, 42
+01;live;comment end of line;%42 #comment
+01;live;comment end of line no space;%42#comment
+01;live;comment end of line with spaces;%42             #comment
 
 02;ld;ind value is null reg is valid;0,r2
-02;ld;ind value is null reg is invalid;0,r32
+02;ld;ind value is null reg value too big;0,r32
 02;ld;ind value is pos reg is valid;42,r2
 02;ld;ind value is neg reg is valid;-42,r2
 02;ld;ind value is big reg is valid;49859842,r2
@@ -21,7 +31,7 @@
 02;ld;ind value is too big reg is valid;94837589436749859842,r2
 02;ld;ind value is too small reg is valid;-94837589436749859842,r2
 02;ld;dir value is null reg is valid;%0,r2
-02;ld;dir value is null reg is invalid;%0,r32
+02;ld;dir value is null reg value too big;%0,r32
 02;ld;dir value is pos reg is valid;%42,r2
 02;ld;dir value is neg reg is valid;%-42,r2
 02;ld;dir value is big reg is valid;%49859842,r2
@@ -31,35 +41,75 @@
 02;ld;dir value is uint max reg is valid;%4294967295,r2
 02;ld;dir value is too big reg is valid;%94837589436749859842,r2
 02;ld;dir value is too small reg is valid;%-94837589436749859842,r2
+02;ld;dir value is empty reg is valid;%,r2
+02;ld;ind value is empty reg is valid;,r2
+02;ld;no arg;
+02;ld;no arg but spaces and comment;      #comment;
+02;ld;dir value is pos reg is valid too many args;%42,r2,r1
+02;ld;dir value is pos reg is valid too many commas;%42,r2,
+02;ld;dir value is pos reg is valid comment end of line;%42,r2 #comment
+02;ld;dir value is pos reg is valid comment end of line no space;%42,r2#comment
+02;ld;dir value is pos reg is valid comment end of line withs spaces;%42,r2    #comment
 
 03;st;reg is valid ind value is null;r1,0
-03;st;reg is valid ind value is pos;r1,42 
-03;st;reg is valid ind value is neg;r1,-42 
+03;st;reg is valid ind value is pos;r1,42
+03;st;reg is valid ind value is neg;r1,-42
 03;st;reg is valid ind value is big;r1,49859842
 03;st;reg is valid ind value is small;r1,-49859842
 03;st;reg is valid ind value is int min;r1,-2147483648
 03;st;reg is valid ind value is int max;r1,2147483647
 03;st;reg is valid ind value is uint max;r1,4294967295
 03;st;reg is valid ind value is too big;r1,94837589436749859842
-03;st;reg is valid ind value is too small;r1,-94837589436749859842 
-03;st;reg is invalid ind value is pos;r32,42 
-03;st;reg is valid reg is valid;r1,r2 
-03;st;reg is invalid reg is valid;r32,r2 
+03;st;reg is valid ind value is too small;r1,-94837589436749859842
+03;st;reg value too big ind value is pos;r32,42
+03;st;reg is valid reg is valid;r1,r2
+03;st;reg value too big reg is valid;r32,r2
+03;st;no arg;
+03;st;no arg comma only;,
+03;st;too many args empty;,,
+03;st;too many args only registers;r1,r2,r3
+03;st;first arg is not a register;42,r2
+03;st;second arg is invalid;r1,%42
+03;st;empty spaces around comma;r1  ,  r2
+03;st;no comma between args;r1 r2
+03;st;reg is valid ind value is pos comment end of line;r1,42 #comment
+03;st;reg is valid ind value is pos comment end of line no space;r1,42#comment
+03;st;reg is valid ind value is pos comment end of line with spaces;r1,42      #comment
 
 04;add;all registers are valid;r1,r1,r2
-04;add;first register is invalid;r32,r1,r2
-04;add;second register is invalid;r1,r32,r2
-04;add;third register is invalid;r1,r2,r32
+04;add;first register value too big;r32,r1,r2
+04;add;second register value too big;r1,r32,r2
+04;add;third register value too big;r1,r2,r32
+04;add;no arg;
+04;add;no arg comma only;,,
+04;add;too many args empty;,,,
+04;add;too many args only registers;r1,r2,r3,r4
+04;add;first arg is not a register;42,r2,r3
+04;add;second arg is invalid;r1,%42,r3
+04;add;empty spaces around comma;r1  ,  r2 ,     r3
+04;add;all registers are valid comment end of line;r1,r1,r2 #comment
+04;add;all registers are valid comment end of line no space;r1,r1,r2#comment
+04;add;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 05;sub;all registers are valid;r1,r1,r2
-05;sub;first register is invalid;r32,r1,r2
-05;sub;second register is invalid;r1,r32,r2
-05;sub;third register is invalid;r1,r2,r32
+05;sub;first register value too big;r32,r1,r2
+05;sub;second register value too big;r1,r32,r2
+05;sub;third register value too big;r1,r2,r32
+05;sub;no arg;
+05;sub;no arg comma only;,,
+05;sub;too many args empty;,,,
+05;sub;too many args only registers;r1,r2,r3,r4
+05;sub;first arg is not a register;42,r2,r3
+05;sub;second arg is invalid;r1,%42,r3
+05;sub;empty spaces around comma;r1  ,  r2 ,     r3
+05;sub;all registers are valid comment end of line;r1,r1,r2 #comment
+05;sub;all registers are valid comment end of line no space;r1,r1,r2#comment
+05;sub;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 06;and;three valid registers;r1,r1,r2
-06;and;three registers first is invalid;r32,r1,r2
-06;and;three registers second is invalid;r1,r32,r2
-06;and;three registers third is invalid;r1,r1,r32
+06;and;three registers first value too big;r32,r1,r2
+06;and;three registers second value too big;r1,r32,r2
+06;and;three registers third value too big;r1,r1,r32
 06;and;ind value is null and two valid registers;0,r1,r2
 06;and;ind value is pos and two valid registers;42,r1,r2
 06;and;ind value is neg and two valid registers;-42,r1,r2
@@ -80,11 +130,20 @@
 06;and;dir value is uint max and two valid registers;%4294967295,r1,r2
 06;and;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 06;and;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+06;and;no arg;
+06;and;no arg comma only;,,
+06;and;too many args empty;,,,
+06;and;too many args only registers;r1,r2,r3,r4
+06;and;last arg is not a register;r1,r2,42
+06;and;empty spaces around comma;r1  ,  r2 ,     r3
+06;and;all registers are valid comment end of line;r1,r1,r2 #comment
+06;and;all registers are valid comment end of line no space;r1,r1,r2#comment
+06;and;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 07;or;three valid registers;r1,r1,r2
-07;or;three registers first is invalid;r32,r1,r2
-07;or;three registers second is invalid;r1,r32,r2
-07;or;three registers third is invalid;r1,r1,r32
+07;or;three registers first value too big;r32,r1,r2
+07;or;three registers second value too big;r1,r32,r2
+07;or;three registers third value too big;r1,r1,r32
 07;or;ind value is null and two valid registers;0,r1,r2
 07;or;ind value is pos and two valid registers;42,r1,r2
 07;or;ind value is neg and two valid registers;-42,r1,r2
@@ -105,11 +164,20 @@
 07;or;dir value is uint max and two valid registers;%4294967295,r1,r2
 07;or;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 07;or;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+07;or;no arg;
+07;or;no arg comma only;,,
+07;or;too many args empty;,,,
+07;or;too many args only registers;r1,r2,r3,r4
+07;or;last arg is not a register;r1,r2,42
+07;or;empty spaces around comma;r1  ,  r2 ,     r3
+07;or;all registers are valid comment end of line;r1,r1,r2 #comment
+07;or;all registers are valid comment end of line no space;r1,r1,r2#comment
+07;or;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 08;xor;three valid registers;r1,r1,r2
-08;xor;three registers first is invalid;r32,r1,r2
-08;xor;three registers second is invalid;r1,r32,r2
-08;xor;three registers third is invalid;r1,r1,r32
+08;xor;three registers first value too big;r32,r1,r2
+08;xor;three registers second value too big;r1,r32,r2
+08;xor;three registers third value too big;r1,r1,r32
 08;xor;ind value is null and two valid registers;0,r1,r2
 08;xor;ind value is pos and two valid registers;42,r1,r2
 08;xor;ind value is neg and two valid registers;-42,r1,r2
@@ -130,6 +198,15 @@
 08;xor;dir value is uint max and two valid registers;%4294967295,r1,r2
 08;xor;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 08;xor;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+08;xor;no arg;
+08;xor;no arg comma only;,,
+08;xor;too many args empty;,,,
+08;xor;too many args only registers;r1,r2,r3,r4
+08;xor;last arg is not a register;r1,r2,42
+08;xor;empty spaces around comma;r1  ,  r2 ,     r3
+08;xor;all registers are valid comment end of line;r1,r1,r2 #comment
+08;xor;all registers are valid comment end of line no space;r1,r1,r2#comment
+08;xor;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 09;zjmp;dir value is null carry is one;%0
 09;zjmp;dir value is pos carry is one;%42
@@ -151,11 +228,17 @@
 09;zjmp;dir value is uint max carry is null;%4294967295;ld %1,r4
 09;zjmp;dir value is too big carry is null;%94837589436749859842;ld %1,r4
 09;zjmp;dir value is too small carry is null;%-94837589436749859842;ld %1,r4
+09;zjmp;no arg;
+09;zjmp;too many args empty;,
+09;zjmp;too many args;%2,%3
+09;zjmp;dir value is pos carry is one comment end of line;%42 #comment
+09;zjmp;dir value is pos carry is one comment end of line no space;%42#comment
+09;zjmp;dir value is pos carry is one comment end of line with spaces;%42   #comment
 
 10;ldi;three valid registers;r1,r1,r2
-10;ldi;three registers first is invalid;r32,r1,r2
-10;ldi;three registers second is invalid;r1,r32,r2
-10;ldi;three registers third is invalid;r1,r1,r32
+10;ldi;three registers first value too big;r32,r1,r2
+10;ldi;three registers second value too big;r1,r32,r2
+10;ldi;three registers third value too big;r1,r1,r32
 10;ldi;ind value is null and two valid registers;0,r1,r2
 10;ldi;ind value is pos and two valid registers;42,r1,r2
 10;ldi;ind value is neg and two valid registers;-42,r1,r2
@@ -176,11 +259,20 @@
 10;ldi;dir value is uint max and two valid registers;%4294967295,r1,r2
 10;ldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 10;ldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+10;ldi;no arg;
+10;ldi;no arg comma only;,,
+10;ldi;too many args empty;,,,
+10;ldi;too many args only registers;r1,r2,r3,r4
+10;ldi;last arg is not a register;r1,r2,42
+10;ldi;empty spaces around comma;r1  ,  r2 ,     r3
+10;ldi;all registers are valid comment end of line;r1,r1,r2 #comment
+10;ldi;all registers are valid comment end of line no space;r1,r1,r2#comment
+10;ldi;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 11;sti;three valid registers;r1,r1,r2
-11;sti;three registers first is invalid;r32,r1,r2
-11;sti;three registers second is invalid;r1,r32,r2
-11;sti;three registers third is invalid;r1,r1,r32
+11;sti;three registers first value too big;r32,r1,r2
+11;sti;three registers second value too big;r1,r32,r2
+11;sti;three registers third value too big;r1,r1,r32
 11;sti;ind value is null and two valid registers;r1,0,r2
 11;sti;ind value is pos and two valid registers;r1,42,r2
 11;sti;ind value is neg and two valid registers;r1,-42,r2
@@ -211,6 +303,15 @@
 11;sti;two valid registers and dir value is small;r1,r2,%-49859842
 11;sti;two valid registers and dir value is too big;r1,r2,%94837589436749859842
 11;sti;two valid registers and dir value is too small;r1,r2,%-94837589436749859842
+11;sti;no arg;
+11;sti;no arg comma only;,,
+11;sti;too many args empty;,,,
+11;sti;too many args only registers;r1,r2,r3,r4
+11;sti;last arg is not a register;r1,r2,42
+11;sti;empty spaces around comma;r1  ,  r2 ,     r3
+11;sti;all registers are valid comment end of line;r1,r1,r2 #comment
+11;sti;all registers are valid comment end of line no space;r1,r1,r2#comment
+11;sti;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 12;fork;dir value is null;%0
 12;fork;dir value is pos;%42
@@ -222,9 +323,15 @@
 12;fork;dir value is uint max;%4294967295
 12;fork;dir value is too big;%94837589436749859842
 12;fork;dir value is too small;%-94837589436749859842
+12;fork;no arg;
+12;fork;too many args empty;,
+12;fork;too many args;%2,%3
+12;fork;dir value is pos comment end of line;%42 #comment
+12;fork;dir value is pos comment end of line no space;%42#comment
+12;fork;dir value is pos comment end of line with spaces;%42   #comment
 
 13;lld;ind value is null reg is valid;0,r2
-13;lld;ind value is null reg is invalid;0,r32
+13;lld;ind value is null reg value too big;0,r32
 13;lld;ind value is pos reg is valid;42,r2
 13;lld;ind value is neg reg is valid;-42,r2
 13;lld;ind value is big reg is valid;49859842,r2
@@ -235,7 +342,7 @@
 13;lld;ind value is too big reg is valid;94837589436749859842,r2
 13;lld;ind value is too small reg is valid;-94837589436749859842,r2
 13;lld;dir value is null reg is valid;%0,r2
-13;lld;dir value is null reg is invalid;%0,r32
+13;lld;dir value is null reg value too big;%0,r32
 13;lld;dir value is pos reg is valid;%42,r2
 13;lld;dir value is neg reg is valid;%-42,r2
 13;lld;dir value is big reg is valid;%49859842,r2
@@ -247,9 +354,9 @@
 13;lld;dir value is too small reg is valid;%-94837589436749859842,r2
 
 14;lldi;three valid registers;r1,r1,r2
-14;lldi;three registers first is invalid;r32,r1,r2
-14;lldi;three registers second is invalid;r1,r32,r2
-14;lldi;three registers third is invalid;r1,r1,r32
+14;lldi;three registers first value too big;r32,r1,r2
+14;lldi;three registers second value too big;r1,r32,r2
+14;lldi;three registers third value too big;r1,r1,r32
 14;lldi;ind value is null and two valid registers;0,r1,r2
 14;lldi;ind value is pos and two valid registers;42,r1,r2
 14;lldi;ind value is neg and two valid registers;-42,r1,r2
@@ -270,6 +377,15 @@
 14;lldi;dir value is uint max and two valid registers;%4294967295,r1,r2
 14;lldi;dir value is too big and two valid registers;%94837589436749859842,r1,r2
 14;lldi;dir value is too small and two valid registers;%-94837589436749859842,r1,r2
+14;lldi;no arg;
+14;lldi;no arg comma only;,,
+14;lldi;too many args empty;,,,
+14;lldi;too many args only registers;r1,r2,r3,r4
+14;lldi;last arg is not a register;r1,r2,42
+14;lldi;empty spaces around comma;r1  ,  r2 ,     r3
+14;lldi;all registers are valid comment end of line;r1,r1,r2 #comment
+14;lldi;all registers are valid comment end of line no space;r1,r1,r2#comment
+14;lldi;all registers are valid comment end of line with spaces;r1,r1,r2    #comment
 
 15;lfork;dir value is null;%0
 15;lfork;dir value is pos;%42
@@ -281,8 +397,20 @@
 15;lfork;dir value is uint max;%4294967295
 15;lfork;dir value is too big;%94837589436749859842
 15;lfork;dir value is too small;%-94837589436749859842
+15;lfork;no arg;
+15;lfork;too many args empty;,
+15;lfork;too many args;%2,%3
+15;lfork;dir value is pos comment end of line;%42 #comment
+15;lfork;dir value is pos comment end of line no space;%42#comment
+15;lfork;dir value is pos comment end of line with spaces;%42   #comment
 
 16;aff;reg is valid;r1
 16;aff;reg is valid and null;r2
-16;aff;reg is invalid;r32
+16;aff;reg value too big;r32
 16;aff;reg is valid print a;r2;ld %97,r2
+16;aff;no arg;
+16;aff;too many args empty;,
+16;aff;too many args;r1,r2
+16;aff;reg is valid comment end of line;r1 #comment
+16;aff;reg is valid comment end of line no space;r1#comment
+16;aff;reg is valid comment end of line with spaces;r1   #comment
