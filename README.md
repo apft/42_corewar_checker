@@ -2,8 +2,9 @@
 
 This is a set of scripts to check both programs of the [42]'s project Corewar.
 
-* [*asm_checker.sh*](#asm-checker)
-* [*vm_checker.sh*](#vm-checker)
+* [*asm checker*](#asm-checker)
+* [*vm checker*](#vm-checker)
+* [*dump checker*](#dump-checker)
 
 
 #### TL;DR
@@ -34,6 +35,9 @@ $ ./vm_checker.sh -blt 20 -B ../asm ../corewar champs/**/*.{s,cor}
 
 # Run 25 fights (1vs1) with your champion against random champions
 $ ./vm_checker.sh -f 25 -m 2 -p ../your_champion.s ../corewar champs/bytecode/*.cor
+
+# Run the dump checker with default clean options with two champions
+$ ./dump_checker.sh ../corewar champs/bytecode/zork.s champs/bytecode/ultima.cor
 ````
 
 ## Asm checker
@@ -178,6 +182,47 @@ will produce the following file `01_live-dir_value_is_null.s` with the following
 .comment "live: dir value is null"
 
 live %0
+```
+
+### Dump checker
+
+In order to check that the memory does not diverge from the reference, we have
+developed a script called `dump_checker.sh` to help find where the memory
+diverges if this is the case.  
+Because your output may differ from the reference output, you need to adapt the
+script in the first place to be able to use it (it does a diff on the outputs).   
+Basically you need to provide the name of the option you use to dump the memory
+(default to `-dump`), the number of bytes on one line (default to `32`) and if
+you are using colors or any other formatting, you can clean your output by
+piping some commands in `CLEAN_OUTPUT`.
+Those commands are stored in the following variables :
+
+* `REMOVE_TRAILING_SPACE` : to remove a trailing space
+* `REMOVE_TRAILING_SPACES` : same but for multiple spaces
+* `KEEP_ONLY_MEMORY_WITH_ADDRESSES` : runs a `grep` to only keep the part of the output with the memory dump (used for Zaz's output)
+* `KEEP_ONLY_MEMORY_BY_DUMP_SIZE` : runs a `grep` to extract the part with the dumped memory, uses a regex to extract `DUMP_SIZE` of 2 hexadecimal numbers followed by an optional space
+* `REMOVE_ADDRESSES` : remove the addresses in Zaz's output
+* `REMOVE_NON_PRINT_AND_FORMATTING_CHARS` : clean the output if colors and formatting are used
+
+Because all these commands are piped, beware of the order you call them.  
+Of course you can add your own pipe to the `CLEAN_OUTPUT` variable.
+
+Once you have adapted the script, use the following command to run the script.
+```
+./dump_checker.sh ../corewar champs/bytecode/zork.cor champs/bytecode/ultima.cor
+```
+Here two champions will be loaded and the script will check if the dumped memory
+differ. In case the outputs differ, the script will try to find the first cycle
+where each output diverge and the diff is then stored in the `diff_output.tmp`
+file. 
+
+#### Usage
+```
+Usage:  ./dump_checker.sh <corewar> <player> [...]
+
+    <corewar>     path to your executable
+    <player>      list of players to use
+
 ```
 
 
