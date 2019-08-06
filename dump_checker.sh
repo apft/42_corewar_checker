@@ -27,10 +27,10 @@ KEEP_ONLY_MEMORY_BY_DUMP_SIZE="grep -E \"([0-9a-fA-F]{2} *){$DUMP_SIZE}\""
 # this command can be used to remove them
 REMOVE_ADDRESSES="cut -d ':' -f 2 | cut -c 2-"
 
-# If the output has non printable and formating characters, the following
+# If the output has non printable and formatting characters, the following
 # command remove them
 # use this command if colors or bold format are used for instance
-REMOVE_NON_PRINT_AND_FORMATING_CHARS="tr -d '\000-\011\013\014\016-\037' | sed -E 's/\[([0-9]+;*)+m//g'"
+REMOVE_NON_PRINT_AND_FORMATTING_CHARS="tr -d '\000-\011\013\014\016-\037' | sed -E 's/\[([0-9]+;*)+m//g'"
 
 # ===> Change this part if needed <=== #########################################
 # The 'CLEAN_OUTPUT' variable is used to clean user's output
@@ -39,7 +39,7 @@ REMOVE_NON_PRINT_AND_FORMATING_CHARS="tr -d '\000-\011\013\014\016-\037' | sed -
 CLEAN_OUTPUT=""
 CLEAN_OUTPUT+=" | $KEEP_ONLY_MEMORY_WITH_ADDRESSES | $REMOVE_ADDRESSES"
 CLEAN_OUTPUT+=" | $KEEP_ONLY_MEMORY_BY_DUMP_SIZE"
-CLEAN_OUTPUT+=" | $REMOVE_NON_PRINT_AND_FORMATING_CHARS"
+CLEAN_OUTPUT+=" | $REMOVE_NON_PRINT_AND_FORMATTING_CHARS"
 CLEAN_OUTPUT+=" | $REMOVE_TRAILING_SPACE"
 # ===> end of change <=== ######################################################
 
