@@ -75,7 +75,13 @@ We tried to make the output of the script as easy as possible.
  * one of the program did not create the file (encounter a parsing error maybe)
 
 
- \* a `.leak` folder stores the valgrind output of the faulty check
+\* a `.leak` folder stores the valgrind output of the faulty check
+
+
+A visual mark is also displayed to easily know if a program exits with an error status.
+* a green check : the program returns `0` (considered as *success*)
+* a red cross : the program returns any other value different from `0` (considered as a *failure*)
+
 
 #### Usage
 ```
