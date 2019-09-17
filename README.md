@@ -13,6 +13,7 @@ This is a set of scripts to check both programs of the [42]'s project Corewar.
 * [Dump checker](#dump-checker)
   * [Usage](#usage-2)
 * [Unit tests](#unit-tests)
+* [Note about the leaks](#note-about-the-leaks)
 
 
 #### TL;DR
@@ -236,6 +237,15 @@ will produce the following file `01_live-dir_value_is_null.s` with the following
 .comment "live: dir value is null"
 
 live %0
+```
+
+## Note about the leaks
+In order to check the eventual `leaks` of a program, `valgrind` is used.  
+The output of the `valgrind` command is stored in a temporary file and based on the configuration of the Mac at 42 Paris, searched for the following lines. If one of those line is missing, then it is assumed that the program leaks. Note that regex are used for the _still reachable_ line.
+```
+definitely lost: 0 bytes in 0 blocks
+indirectly lost: 0 bytes in 0 blocks
+still reachable: 200 bytes in [0-9] blocks
 ```
 
 
